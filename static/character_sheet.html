@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бланк персонажа - Вампиры: Маскарад</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="character-sheet">
+        <!-- Шапка -->
+        <div class="header">
+            <div class="header-row">
+                <div class="field">
+                    <label>Имя</label>
+                    <input type="text">
+                </div>
+                <div class="field">
+                    <label>Концепция</label>
+                    <input type="text">
+                </div>
+                <div class="field">
+                    <label>Стиль охоты</label>
+                    <input type="text">
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="field">
+                    <label>Хроника</label>
+                    <input type="text">
+                </div>
+                <div class="field">
+                    <label>Цель</label>
+                    <input type="text">
+                </div>
+                <div class="field">
+                    <label>Клан</label>
+                    <input type="text">
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="field">
+                    <label>Сир</label>
+                    <input type="text">
+                </div>
+                <div class="field">
+                    <label>Прихоть</label>
+                    <input type="text">
+                </div>
+                <div class="field">
+                    <label>Поколение</label>
+                    <input type="text">
+                </div>
+            </div>
+        </div>
+
+        <!-- Основная секция -->
+        <div class="main-section">
+            <!-- Левая колонка -->
+            <div class="left-column">
+                <!-- Характеристики -->
+                <div class="section">
+                    <h2>ХАРАКТЕРИСТИКИ</h2>
+                    <div class="attributes-container">
+                        <div class="attributes-group">
+                            <h3>Физические</h3>
+                            <div class="attribute">
+                                <span>Сила</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="attribute">
+                                <span>Ловкость</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="attribute">
+                                <span>Выносливость</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                        </div>
+
+                        <div class="attributes-group">
+                            <h3>Социальные</h3>
+                            <div class="attribute">
+                                <span>Обаяние</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="attribute">
+                                <span>Манипуляция</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="attribute">
+                                <span>Самообладание</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                        </div>
+
+                        <div class="attributes-group">
+                            <h3>Ментальные</h3>
+                            <div class="attribute">
+                                <span>Интеллект</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="attribute">
+                                <span>Смекалка</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="attribute">
+                                <span>Упорство</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Здоровье и Воля -->
+                <div class="trackers">
+                    <div class="tracker">
+                        <h3>Здоровье</h3>
+                        <div class="mutable_tracker boxes" data-total="10" data-value="0", data-type="box"></div>
+                    </div>
+                    <div class="tracker">
+                        <h3>Воля</h3>
+                        <div class="mutable_tracker boxes" data-total="10" data-value="0", data-type="box"></div>
+                    </div>
+                </div>
+
+                <!-- Навыки -->
+                <div class="section">
+                    <h2>НАВЫКИ</h2>
+                    <div class="skills-columns">
+                        <div class="skills-column">
+                            <div class="skill">
+                                <span>Атлетика</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Вождение</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Воровство</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Выживание</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Драка</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Ремесло</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Скрытность</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Стрельба</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Фехтование</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                        </div>
+                        <div class="skills-column">
+                            <div class="skill">
+                                <span>Запугивание</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Исполнение</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Лидерство</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Обращение с животными</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Проницательность</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Убеждение</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Уличное чутьё</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Хитрость</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Этикет</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                        </div>
+                        <div class="skills-column">
+                            <div class="skill">
+                                <span>Гуманитарные науки</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Естественные науки</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Медицина</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Наблюдательность</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Оккультизм</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Политика</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Расследование</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Техника</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                            <div class="skill">
+                                <span>Финансы</span>
+                                <div class="mutable_tracker dots" data-total="5" data-value="0", data-type="dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Дисциплины -->
+                <div class="section">
+                    <h2>ДИСЦИПЛИНЫ</h2>
+                    <div class="disciplines">
+                        <div class="discipline">
+                            <input type="text" placeholder="Название">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="discipline">
+                            <input type="text" placeholder="Название">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="discipline">
+                            <input type="text" placeholder="Название">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="discipline">
+                            <input type="text" placeholder="Название">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="discipline">
+                            <input type="text" placeholder="Название">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="discipline">
+                            <input type="text" placeholder="Название">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Преимущества и недостатки -->
+                <div class="advantages-section">
+                    <h3>Преимущества и недостатки</h3>
+                    <div class="advantages-list">
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                        <div class="advantage-item">
+                            <input type="text" placeholder="">
+                            <div class="dots">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая колонка -->
+            <div class="right-column">
+                <!-- Резонанс, Голод, Человечность -->
+                <div class="trackers-right">
+                    <div class="tracker-small">
+                        <h3>Резонанс</h3>
+                        <textarea></textarea>
+                    </div>
+                    <div class="tracker-small">
+                        <h3>Голод</h3>
+                        <div class="mutable_tracker boxes bloody" data-total="5" data-value="0", data-type="box"></div>
+                    </div>
+                    <div class="tracker-small">
+                        <h3>Человечность</h3>
+                        <div class="mutable_tracker boxes" data-total="10" data-value="0", data-type="box"></div>
+                    </div>
+                </div>
+
+                <!-- Тема хроники -->
+                <div class="text-section">
+                    <h3>Тема хроники</h3>
+                    <textarea></textarea>
+                </div>
+
+                <!-- Опоры и принципы -->
+                <div class="text-section">
+                    <h3>Опоры и принципы</h3>
+                    <textarea></textarea>
+                </div>
+
+                <!-- Клановый изъян -->
+                <div class="text-section">
+                    <h3>Клановый изъян</h3>
+                    <textarea></textarea>
+                </div>
+
+                <!-- Сила Крови -->
+                <div class="blood-potency">
+                    <h3>Сила Крови</h3>
+                    <div class="mutable_tracker dots bloody" data-total="10" data-value="0", data-type="dot"></div>
+                    <div class="blood-info">
+                        <div class="info-item">
+                            <label>Модификатор прилива Крови</label>
+                            <input type="text">
+                        </div>
+                        <div class="info-item">
+                            <label>Заживление</label>
+                            <input type="text">
+                        </div>
+                        <div class="info-item">
+                            <label>Модификатор пула Дисциплин</label>
+                            <input type="text">
+                        </div>
+                        <div class="info-item">
+                            <label>Повторное испытание Крови (уровень силы)</label>
+                            <input type="text">
+                        </div>
+                        <div class="info-item">
+                            <label>Проблемы с питанием</label>
+                            <input type="text">
+                        </div>
+                        <div class="info-item">
+                            <label>Тяжесть изъяна</label>
+                            <input type="text">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Опыт -->
+                <div class="experience">
+                    <div class="exp-field">
+                        <label>Всего пунктов опыта</label>
+                        <input type="text">
+                    </div>
+                    <div class="exp-field">
+                        <label>Потрачено пунктов опыта</label>
+                        <input type="text">
+                    </div>
+                </div>
+
+                <!-- Возраст и внешность -->
+                <div class="age-section">
+                    <div class="age-row">
+                        <div class="age-field">
+                            <label>Истинный возраст</label>
+                            <input type="text">
+                        </div>
+                        <div class="age-field">
+                            <label>Видимый возраст</label>
+                            <input type="text">
+                        </div>
+                    </div>
+                    <div class="age-row">
+                        <div class="age-field">
+                            <label>Дата рождения</label>
+                            <input type="text">
+                        </div>
+                        <div class="age-field">
+                            <label>Дата смерти</label>
+                            <input type="text">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Внешность -->
+                <div class="text-section">
+                    <h3>Внешность</h3>
+                    <textarea></textarea>
+                </div>
+
+                <!-- Заметки -->
+                <div class="text-section">
+                    <h3>Заметки</h3>
+                    <textarea></textarea>
+                </div>
+
+                <!-- Отличительные черты -->
+                <div class="text-section">
+                    <h3>Отличительные черты</h3>
+                    <textarea></textarea>
+                </div>
+
+                <!-- История -->
+                <div class="text-section">
+                    <h3>История</h3>
+                    <textarea></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function initTracker(container) {
+            const total = parseInt(container.dataset.total) || 10;
+            const pointType = container.dataset.type || 'dot';
+            let value = parseInt(container.dataset.value) || 0; // текущее значение
+
+            // Создаём точки
+            for (let i = 0; i < total; i++) {
+                const point = document.createElement('span');
+                point.className = pointType + (i < value ? ' filled' : '');
+                point.dataset.index = i;
+                point.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    
+                    if (index === value - 1) {
+                        // Клик на последнюю закрашенную точку → сброс
+                        value = 0;
+                    } else {
+                        // Иначе устанавливаем новое значение = индекс + 1
+                        value = index + 1;
+                    }
+                    
+                    updateDots();
+                });
+                container.appendChild(point);
+            }
+
+            function updateDots() {
+                const points = container.querySelectorAll('.' + pointType);
+                points.forEach((point, idx) => {
+                    if (idx < value) {
+                        point.classList.add('filled');
+                    } else {
+                        point.classList.remove('filled');
+                    }
+                });
+                // Сохраняем новое значение в data-атрибуте для возможного использования
+                container.dataset.value = value;
+            }
+
+            // Первоначальное обновление (на случай, если value изменили вручную)
+            updateDots();
+        }
+
+        // Инициализируем все трекеры на странице
+        document.querySelectorAll('.mutable_tracker').forEach(initTracker);
+    </script>
+</body>
+</html>
