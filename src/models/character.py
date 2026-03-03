@@ -16,23 +16,27 @@ class VampireCharacter:
     
     # Характеристики (Attributes)
     # Физические
-    strength: int = 0  # Сила
-    dexterity: int = 0  # Ловкость
-    stamina: int = 0  # Выносливость
+    strength: int = 3  # Сила
+    dexterity: int = 3  # Ловкость
+    stamina: int = 3  # Выносливость
     
     # Социальные
-    charisma: int = 0  # Обаяние
-    manipulation: int = 0  # Манипуляция
-    composure: int = 0  # Самообладание
+    charisma: int = 3  # Обаяние
+    manipulation: int = 3  # Манипуляция
+    composure: int = 3  # Самообладание
     
     # Ментальные
-    intelligence: int = 0  # Интеллект
-    wits: int = 0  # Смекалка
-    resolve: int = 0  # Упорство
+    intelligence: int = 3  # Интеллект
+    wits: int = 3  # Смекалка
+    resolve: int = 3  # Упорство
     
-    # Трекеры
-    health: int = 0  # Здоровье (max 10)
-    willpower: int = 0  # Воля (max 10)
+    # Здоровье и воля
+    hard_health_damage: int = 0  # Агравированные повреждения
+    light_health_damage: int = 0 # Легкие повреждения
+    health_exhausted: bool = False # Физическое истощение 
+    hard_willpower_damage: int = 0  # Тяжелый стресс
+    light_willpower_damage: int = 0  # Легкий стресс
+    willpower_exhausted: bool = False # Социальное и ментальное истощение
     
     # Навыки (Skills)
     # Физические навыки
@@ -78,7 +82,7 @@ class VampireCharacter:
     # Дополнительные параметры
     resonance: str = ""  # Резонанс
     hunger: int = 0  # Голод (max 5)
-    humanity: int = 0  # Человечность (max 10)
+    humanity: int = 8  # Человечность (max 10)
     
     # Тема хроники и принципы
     chronicle_theme: str = ""
@@ -88,7 +92,7 @@ class VampireCharacter:
     clan_bane: str = ""
     
     # Сила Крови (Blood Potency)
-    blood_potency: int = 0  # Сила Крови (max 10)
+    blood_potency: int = 1  # Сила Крови (max 10)
     blood_surge_modifier: str = ""  # Модификатор прилива Крови
     healing: str = ""  # Заживление
     discipline_pool_modifier: str = ""  # Модификатор пула Дисциплин
@@ -97,12 +101,12 @@ class VampireCharacter:
     bane_severity: str = ""  # Тяжесть изъяна
     
     # Опыт
-    total_experience: str = ""  # Всего пунктов опыта
-    spent_experience: str = ""  # Потрачено пунктов опыта
+    total_experience: int = ""  # Всего пунктов опыта
+    spent_experience: int = ""  # Потрачено пунктов опыта
     
     # Возраст и внешность
-    true_age: str = ""  # Истинный возраст
-    apparent_age: str = ""  # Видимый возраст
+    true_age: int = ""  # Истинный возраст
+    apparent_age: int = ""  # Видимый возраст
     date_of_birth: str = ""  # Дата рождения
     date_of_death: str = ""  # Дата смерти
     
@@ -178,6 +182,28 @@ class VampireCharacter:
             "finance": self.finance
         }
     
+    def get_basic_trackers(self) -> Dict[str, int]:
+        """Возвращает словарь всех доступных простых трекеров"""
+        return {
+            **self.get_physical_attributes(),
+            **self.get_social_attributes(),
+            **self.get_mental_attributes(),
+            **self.get_physical_skills(),
+            **self.get_social_skills(),
+            **self.get_mental_skills(),
+            'hunger': self.hunger,
+            'humanity': self.humanity,
+            'blood_potency': self.blood_potency,
+        }
+    
+    def get_max_health(self) -> int:
+        """Возвращает максимальное здоровье вампира"""
+        return self.stamina + 3
+    
+    def get_max_willpower(self) -> int:
+        """Возвращает максимальное значение воли вампира"""
+        return self.resolve + self.composure
+    
     def add_discipline(self, name: str, level: int) -> None:
         """Добавляет или обновляет уровень дисциплины"""
         self.disciplines[name] = level
@@ -189,3 +215,58 @@ class VampireCharacter:
     def add_flaw(self, name: str, level: int) -> None:
         """Добавляет недостаток"""
         self.flaws[name] = level
+    
+    def update(self, attr_name: str, value: int) -> bool:
+        """Обновляет значение атрибута"""
+        if hasattr(self, attr_name):
+            setattr(self, attr_name, value)
+            return True
+        return False
+    
+    def add_health_damage(self, damage: int, is_hard_damage: bool, is_partial_damage: bool) -> None:
+        if is_partial_damage:
+            damage = (damage + 1) // 2 # Округление в большую сторону
+
+        remaining_health = self.get_max_health() - self.hard_health_damage - self.light_health_damage
+
+        if is_hard_damage:
+            self.hard_health_damage += damage
+            self.light_health_damage += min(0, remaining_health - damage) # Остаток тяжелых повреждений перекрывает легкие
+        else:
+            self.light_health_damage += min(damage, remaining_health)
+            self.add_health_damage(max(0, damage - remaining_health), True, False) # Остаток становится тяжелыми повреждениями
+
+        self.hard_health_damage = min(self.get_max_health(), self.hard_health_damage)
+        self.light_health_damage = max(0, self.light_health_damage)
+
+        self.health_exhausted = (self.hard_health_damage + self.light_health_damage) >= self.get_max_health()
+
+    def add_willpower_damage(self, damage: int, is_hard_damage: bool, is_partial_damage: bool) -> None:
+        if is_partial_damage:
+            damage = (damage + 1) // 2 # Округление в большую сторону
+
+        remaining_willpower = self.get_max_willpower() - self.hard_willpower_damage - self.light_willpower_damage
+
+        if is_hard_damage:
+            self.hard_willpower_damage += damage
+            self.light_willpower_damage += min(0, remaining_willpower - damage) # Остаток тяжелых повреждений перекрывает легкие
+        else:
+            self.light_willpower_damage += min(damage, remaining_willpower)
+            self.add_willpower_damage(damage - remaining_willpower, True, False) # Остаток становится тяжелыми повреждениями
+
+        self.hard_willpower_damage = min(self.get_max_willpower(), self.hard_willpower_damage)
+        self.light_willpower_damage = max(0, self.light_willpower_damage)
+
+        self.willpower_exhausted = (self.hard_willpower_damage + self.light_willpower_damage) >= self.get_max_willpower()
+
+    def get_life_stats(self) -> Dict[str, int]:
+        return {
+            'max_health': self.get_max_health(),
+            'hard_health_damage': self.hard_health_damage,
+            'light_health_damage': self.light_health_damage,
+            'health_exhausted': self.health_exhausted,
+            'max_willpower': self.get_max_willpower(),
+            'hard_willpower_damage': self.hard_willpower_damage,
+            'light_willpower_damage': self.light_willpower_damage,
+            'willpower_exhausted': self.willpower_exhausted,
+        }
