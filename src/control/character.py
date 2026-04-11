@@ -18,7 +18,7 @@ class CharactersController:
         if self.path is None:
             return
 
-        with open(self.path, 'w+') as f:
+        with open(self.path, 'w+', encoding='utf-8') as f:
             json.dump(self.current_character.to_dict(), f)
 
     def load_character_list(self) -> List[dict]:
@@ -26,7 +26,7 @@ class CharactersController:
 
         result = []
         for file in chr_dir.glob('*.json'):
-            with open(file, 'r') as f:
+            with open(file, 'r', encoding='utf-8') as f:
                 f_dict = json.load(f)
                 result.append({
                     'name': f_dict.get('name', None),
@@ -38,7 +38,7 @@ class CharactersController:
         return result
 
     def load_character(self, file_path: str):
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             self.current_character = character.VampireCharacter.from_dict(json.load(f))
             self.path = Path(file_path)
 

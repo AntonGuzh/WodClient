@@ -28,7 +28,7 @@ class DisciplinesController:
 
         result = defaultdict(list)
         for file in chr_dir.glob('*.json'):
-            with open(file, 'r') as f:
+            with open(file, 'r', encoding='utf-8') as f:
                 f_dict = json.load(f)
                 for item_dict in f_dict['powers']:
                     result[Discipline.from_dict(f_dict['discipline'])].append(DisciplinePower.from_dict(item_dict))
