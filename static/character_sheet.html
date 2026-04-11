@@ -7,6 +7,144 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Блок с кнопками действий -->
+    <div class="action-buttons">
+        <button class="action-btn" onclick="renderCharacterList()">Мои персонажи</button>
+        <span></span>
+        <button class="action-btn" onclick="showDiceModal()">🎲 Бросить кости</button>
+        <button class="action-btn" onclick="showDamageModal()">💔 Нанести урон</button>
+        <button class="action-btn" onclick="showStressModal()">😰 Получить стресс</button>
+    </div>
+
+    <!-- Модальное окно для урона -->
+    <div id="damageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeDamageModal()">&times;</span>
+            </div>
+            <h3>Нанесение урона</h3>
+            <input type="number" id="damageAmount" min="1" placeholder="Количество урона">
+            <div class="toggle-group">
+                <label>
+                    <input type="checkbox" id="isHeavyDamage"> 
+                    Тяжёлый урон (X)
+                </label>
+                <label>
+                    <input type="checkbox" id="halveDamage" checked> 
+                    Ополовинить урон (с учётом брони/сопротивления)
+                </label>
+            </div>
+            <button class="modal-submit" onclick="applyDamage()">Применить урон</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно для стресса -->
+    <div id="stressModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeStressModal()">&times;</span>
+            </div>
+            <h3>Получение стресса</h3>
+            <input type="number" id="stressAmount" min="1" placeholder="Количество стресса">
+            <div class="toggle-group">
+                <label>
+                    <input type="checkbox" id="isHeavyStress"> 
+                    Тяжёлый стресс (X)
+                </label>
+                <label>
+                    <input type="checkbox" id="halveStress" checked> 
+                    Ополовинить стресс (с учётом брони/сопротивления)
+                </label>
+            </div>
+            <button class="modal-submit" onclick="applyStress()">Применить стресс</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно для броска костей -->
+    <div id="diceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeDiceModal()">&times;</span>
+            </div>
+            <h3>Бросок костей</h3>
+            
+            <!-- Секция ввода -->
+            <div id="diceInputSection">
+                <input type="number" id="diceCount" min="1" value="1" placeholder="Количество кубиков">
+                <div class="toggle-group">
+                    <label>
+                        <input type="checkbox" id="hungry" checked> 
+                        Учитывать голод
+                    </label>
+                </div>
+                <button class="modal-submit" onclick="rollDice()">Бросить</button>
+            </div>
+            
+            <!-- Секция результатов (изначально скрыта) -->
+            <div id="diceResultSection" style="display: none;">
+                <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
+                    Успехов: <span id="successCount">0</span>
+                </div>
+                
+                <!-- Контейнер для кубиков (картинки) -->
+                <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;">
+                    <!-- сюда будут добавляться img -->
+                </div>
+                
+                <!-- Особые результаты -->
+                <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
+                
+                <!-- Кнопка нового броска -->
+                <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно просмотра дисциплины -->
+    <div id="disciplineDetailsModal" class="modal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header with-nav">
+                <span class="nav-btn back-btn" id="disciplineBackBtn" onclick="backToDisciplinesList()">←</span>
+                <span class="close-btn" onclick="closeDisciplineDetailsModal()">&times;</span>
+            </div>
+            <div id="disciplineDetails" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно просмотра способности -->
+    <div id="powerDetailsModal" class="modal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header with-nav">
+                <span class="nav-btn back-btn" id="powerBackBtn" onclick="backToPowersList()">←</span>
+                <span class="close-btn" onclick="closePowerDetailsModal()">&times;</span>
+            </div>
+            <div id="powerDetails" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно выбора дисциплины (только крестик) -->
+    <div id="addDisciplineModal" class="modal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeAddDisciplineModal()">&times;</span>
+            </div>
+            <h3>Выберите дисциплину</h3>
+            <div id="disciplinesList" class="disciplines-list modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно выбора способности -->
+    <div id="addPowerModal" class="modal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeAddPowerModal()">&times;</span>
+            </div>
+            <h3>Выберите способность</h3>
+            <div id="powersList" class="powers-list modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Остальной HTML остаётся без изменений -->
     <div class="character-sheet">
         <!-- Шапка -->
         <div class="header">
@@ -35,7 +173,9 @@
                 </div>
                 <div class="field">
                     <label>Клан</label>
-                    <input type="text" id="clan">
+                    <select id="clan">
+                        <option value="">Выберите клан</option>
+                    </select>
                 </div>
             </div>
             <div class="header-row">
@@ -254,117 +394,20 @@
                 <!-- Дисциплины -->
                 <div class="section">
                     <h2>ДИСЦИПЛИНЫ</h2>
-                    <div class="disciplines" id="disciplines_container">
-                        <div class="discipline">
-                            <input type="text" placeholder="Название">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
+                    <div class="disciplines-container" id="disciplines_container">
+                        <!-- Кнопка добавления новой дисциплины -->
+                        <div class="add-discipline-btn" onclick="showAddDisciplineModal()">
+                            <span>+ Добавить дисциплину</span>
                         </div>
-                        <div class="discipline">
-                            <input type="text" placeholder="Название">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="discipline">
-                            <input type="text" placeholder="Название">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="discipline">
-                            <input type="text" placeholder="Название">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="discipline">
-                            <input type="text" placeholder="Название">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="discipline">
-                            <input type="text" placeholder="Название">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
+                        <!-- Сюда будут рендериться дисциплины персонажа -->
                     </div>
                 </div>
 
                 <!-- Преимущества и недостатки -->
                 <div class="advantages-section">
                     <h3>Преимущества и недостатки</h3>
-                    <div class="advantages-list" id="advantages_container">
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="advantage-item">
-                            <input type="text" placeholder="">
-                            <div class="dots">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="advantages-list" id="advantages_container"></div>
+                    <button class="add-advantage-btn" onclick="addNewAdvantage()">+ Добавить преимущество/недостаток</button>
                 </div>
             </div>
 
@@ -386,6 +429,38 @@
                     </div>
                 </div>
 
+                <!-- Сила Крови -->
+                <div class="blood-potency">
+                    <h3>Сила Крови</h3>
+                    <div class="mutable_tracker dots bloody" id="blood_potency" data-total="10" data-value="0" data-type="dot"></div>
+                    <div class="blood-info">
+                        <div class="info-item">
+                            <label>Модификатор прилива Крови</label>
+                            <p class="autofilled_text" id="blood_surge_modifier"></p>
+                        </div>
+                        <div class="info-item">
+                            <label>Заживление</label>
+                            <p class="autofilled_text" id="healing"></p>
+                        </div>
+                        <div class="info-item">
+                            <label>Модификатор пула Дисциплин</label>
+                            <p class="autofilled_text" id="discipline_pool_modifier"></p>
+                        </div>
+                        <div class="info-item">
+                            <label>Повторное испытание Крови (уровень силы)</label>
+                            <p class="autofilled_text" id="blood_reroll"></p>
+                        </div>
+                        <div class="info-item">
+                            <label>Проблемы с питанием</label>
+                            <p class="autofilled_text" id="feeding_penalty"></p>
+                        </div>
+                        <div class="info-item">
+                            <label>Тяжесть изъяна</label>
+                            <p class="autofilled_text" id="bane_severity"></p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Тема хроники -->
                 <div class="text-section">
                     <h3>Тема хроники</h3>
@@ -401,39 +476,7 @@
                 <!-- Клановый изъян -->
                 <div class="text-section">
                     <h3>Клановый изъян</h3>
-                    <textarea id="clan_bane"></textarea>
-                </div>
-
-                <!-- Сила Крови -->
-                <div class="blood-potency">
-                    <h3>Сила Крови</h3>
-                    <div class="mutable_tracker dots bloody" id="blood_potency" data-total="10" data-value="0" data-type="dot"></div>
-                    <div class="blood-info">
-                        <div class="info-item">
-                            <label>Модификатор прилива Крови</label>
-                            <input type="text" id="blood_surge_modifier">
-                        </div>
-                        <div class="info-item">
-                            <label>Заживление</label>
-                            <input type="text" id="healing">
-                        </div>
-                        <div class="info-item">
-                            <label>Модификатор пула Дисциплин</label>
-                            <input type="text" id="discipline_pool_modifier">
-                        </div>
-                        <div class="info-item">
-                            <label>Повторное испытание Крови (уровень силы)</label>
-                            <input type="text" id="blood_reroll">
-                        </div>
-                        <div class="info-item">
-                            <label>Проблемы с питанием</label>
-                            <input type="text" id="feeding_penalty">
-                        </div>
-                        <div class="info-item">
-                            <label>Тяжесть изъяна</label>
-                            <input type="text" id="bane_severity">
-                        </div>
-                    </div>
+                    <p class="autofilled_text" id="clan_bane"></p>
                 </div>
 
                 <!-- Опыт -->
@@ -505,9 +548,10 @@
             const pointType = container.dataset.type || 'dot';
             let value = parseInt(container.dataset.value) || 0;
             const attrId = container.id;
+            const advantageName = container.dataset.advantageName; // для преимуществ
             
             container.innerHTML = '';
-            
+
             for (let i = 0; i < total; i++) {
                 const point = document.createElement('span');
                 point.className = pointType + (i < value ? ' filled' : '');
@@ -521,20 +565,18 @@
                     } else {
                         value = index + 1;
                     }
-                    
                     updatePoints();
-                    
-                    // Отправляем изменение в Python
-                    if (attrId) {
-                        pywebview.api.update_basic_tracker(attrId, value).then(result => {
-                            console.log(`Атрибут ${attrId} обновлён, значение: ${value}`);
-                        });
+
+                    if (advantageName !== undefined) {
+                        pywebview.api.update_advantage(advantageName, value);
+                    } else if (attrId) {
+                        pywebview.api.update_basic_tracker(attrId, value);
                     }
                 });
-                
+
                 container.appendChild(point);
             }
-            
+
             function updatePoints() {
                 const points = container.querySelectorAll(`.${pointType}`);
                 points.forEach((point, idx) => {
@@ -546,29 +588,255 @@
                 });
                 container.dataset.value = value;
             }
-            
+
             updatePoints();
         }
 
-        // Загружаем сохранённые значения из Python при старте
-        window.addEventListener('pywebviewready', function() {
-            pywebview.api.get_basic_trackers().then(attributes => {
-                // Обновляем все трекеры согласно загруженным значениям
-                for (const [attrId, value] of Object.entries(attributes)) {
-                    const tracker = document.getElementById(attrId);
-                    if (tracker) {
-                        tracker.dataset.value = value;
-                        // Переинициализируем трекер с новым значением
-                        initTracker(tracker);
+        // Функции для модальных окон
+        function showDamageModal() {
+            document.getElementById('damageModal').style.display = 'block';
+        }
+        
+        function closeDamageModal() {
+            document.getElementById('damageModal').style.display = 'none';
+        }
+        
+        function showDiceModal() {
+            document.getElementById('diceModal').style.display = 'block';
+        }
+        
+        function closeDiceModal() {
+            document.getElementById('diceModal').style.display = 'none';
+        }
+
+        function showStressModal() {
+            document.getElementById('stressModal').style.display = 'block';
+        }
+
+        function closeStressModal() {
+            document.getElementById('stressModal').style.display = 'none';
+        }
+        
+        function applyDamage() {
+            const amount = parseInt(document.getElementById('damageAmount').value);
+            const isHeavy = document.getElementById('isHeavyDamage').checked;
+            const halve = document.getElementById('halveDamage').checked;
+            
+            if (!amount || amount < 1) {
+                alert('Введите корректное количество урона');
+                return;
+            }
+            
+            // Вызываем Python функцию
+            pywebview.api.apply_damage(amount, isHeavy, halve).then(result => {
+                console.log('Урон применён:', result);
+                closeDamageModal();
+            });
+        }
+
+        function applyStress() {
+            const amount = parseInt(document.getElementById('stressAmount').value);
+            const isHeavy = document.getElementById('isHeavyStress').checked;
+            const halve = document.getElementById('halveStress').checked;
+            
+            if (!amount || amount < 1) {
+                alert('Введите корректное количество стресса');
+                return;
+            }
+            
+            pywebview.api.apply_stress(amount, isHeavy, halve).then(result => {
+                console.log('Стресс применён:', result);
+                closeStressModal();
+            });
+        }
+
+        // Функция лечения
+        function healDamage(trackerId, isHeavy) {
+            // trackerId: 'health' или 'willpower'
+            // isHeavy: true = убираем тяжёлое ранение, false = убираем лёгкое
+            
+            let amount = -1;  // отрицательное значение = лечение
+            
+            if (trackerId === 'health') {
+                pywebview.api.apply_damage(amount, isHeavy, false).then(result => {
+                    console.log('Лечение здоровья применено:', result);
+                });
+            } else if (trackerId === 'willpower') {
+                pywebview.api.apply_stress(amount, isHeavy, false).then(result => {
+                    console.log('Лечение воли применено:', result);
+                });
+            }
+        }
+        
+        // Соответствие типов результатов картинкам
+        const diceImages = {
+            0: 'img/dices/FAILURE.png',
+            1: 'img/dices/BESTIAL_FAILURE.png',
+            2: 'img/dices/BLOOD_FAILURE.png',
+            3: 'img/dices/SUCCESS.png',
+            4: 'img/dices/BLOOD_SUCCESS.png',
+            5: 'img/dices/CRITICAL_SUCCESS.png',
+            6: 'img/dices/MESSY_CRITICAL.png'
+        };
+
+        // Функция для форматирования типа результата в читаемый текст (для подсказок)
+        function getResultDescription(result) {
+            const descriptions = {
+                0: 'Неудача',
+                1: 'Звериная неудача',
+                2: 'Провал (Голод)',
+                3: 'Успех',
+                4: 'Успех (Голод)',
+                5: 'Критический успех',
+                6: 'Кровавый критический успех'
+            };
+            return descriptions[result] || result;
+        }
+
+        function renderDiceResults(diceDetails) {
+            const container = document.getElementById('diceResultsContainer');
+            container.innerHTML = '';
+            
+            diceDetails.forEach(detail => {
+                const img = document.createElement('img');
+                img.className = 'dice-image';
+                img.src = diceImages[detail.result] || diceImages['failure'];
+                img.alt = detail.result;
+                img.title = getResultDescription(detail.result);
+                container.appendChild(img);
+            });
+        }
+
+        function renderSpecialResults(specialTuple) {
+            const specialDiv = document.getElementById('specialResults');
+            specialDiv.innerHTML = '';
+            
+            const [failureNum, successNum] = specialTuple;
+            
+            // Описания для каждого числа
+            const failureDescriptions = {
+                0: 'Провал',
+                1: 'Звериный провал',
+            };
+            
+            const successDescriptions = {
+                3: 'Успех',
+                5: 'Триумф',
+                6: 'Кровавый триумф'
+            };
+            
+            // Берём описание или "Неизвестно"
+            const failureDesc = failureDescriptions[failureNum] || 'Провал';
+            const successDesc = successDescriptions[successNum] || 'Успех';
+            
+            specialDiv.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 5px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                    <div><strong>Тип провала:</strong> ${failureDesc}</div>
+                    <div><strong>Тип успеха:</strong> ${successDesc}</div>
+                </div>
+            `;
+        }
+
+        function rollDice() {
+            const count = parseInt(document.getElementById('diceCount').value);
+            const useHunger = document.getElementById('hungry').checked; // чекбокс по умолчанию true
+            
+            if (!count || count < 1) {
+                alert('Введите корректное количество кубиков');
+                return;
+            }
+            
+            pywebview.api.roll_dice(count, useHunger).then(result => {
+                // result = [successes, diceDetails, specialTuple]
+                const successes = result[0];
+                const diceDetails = result[1];
+                const specialTuple = result[2];
+                
+                document.getElementById('successCount').textContent = successes;
+                renderDiceResults(diceDetails);
+                renderSpecialResults(specialTuple);
+                
+                document.getElementById('diceInputSection').style.display = 'none';
+                document.getElementById('diceResultSection').style.display = 'block';
+            });
+        }
+
+        function resetDiceModal() {
+            document.getElementById('diceInputSection').style.display = 'block';
+            document.getElementById('diceResultSection').style.display = 'none';
+            document.getElementById('diceResultsContainer').innerHTML = '';
+            document.getElementById('specialResults').innerHTML = '';
+        }
+
+        function closeDiceModal() {
+            document.getElementById('diceModal').style.display = 'none';
+            resetDiceModal();
+        }
+
+        // Обработчик клика вне модального окна
+        window.onclick = function(event) {
+            const damageModal = document.getElementById('damageModal');
+            const stressModal = document.getElementById('stressModal');
+            const diceModal = document.getElementById('diceModal');
+            if (event.target == damageModal) {
+                damageModal.style.display = 'none';
+            }
+            if (event.target == stressModal) {
+                stressModal.style.display = 'none';
+            }
+            if (event.target == diceModal) {
+                closeDiceModal(); // используем close, чтобы сбросить состояние
+            }
+        }
+
+        // Функция для обновления всех вводимых текстовых полей при загрузке
+        function updateAllTextFields(fields) {
+            for (const [fieldId, value] of Object.entries(fields)) {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.value = value;
+                }
+            }
+        }
+        
+        // Функция для обновления всех автозаполняемых текстовых полей
+        function updateAllAutofilledTextFields(fields) {
+            for (const [fieldId, value] of Object.entries(fields)) {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.innerHTML = value;
+                }
+            }
+        }
+
+        // Функция для автосохранения при изменении поля
+        function setupAutoSave() {
+            // Находим все input и textarea на странице
+            const textInputs = document.querySelectorAll('input[type="text"], textarea');
+            
+            textInputs.forEach(input => {
+                // Сохраняем при потере фокуса (когда пользователь закончил ввод)
+                input.addEventListener('blur', function() {
+                    const fieldId = this.id;
+                    const value = this.value;
+                    
+                    if (fieldId) {
+                        pywebview.api.update_text_field(fieldId, value).then(() => {
+                            console.log(`Автосохранение: ${fieldId}`);
+                        });
                     }
+                });
+                
+                // Или можно сохранять по нажатию Enter (для input)
+                if (input.tagName === 'INPUT') {
+                    input.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            this.blur();  // триггерим blur
+                        }
+                    });
                 }
             });
-        });
-
-        // Инициализируем все трекеры при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.mutable_tracker').forEach(initTracker);
-        });
+        }
 
         // Обновление обоих трекеров жизни и воли
         function updateLifeStats(data) {
@@ -593,12 +861,459 @@
                     box.classList.add('filled');
                 } else if (index < filled + hard) {
                     box.classList.add('hard');
+                    box.classList.remove('not-clickable');
+                    box.onclick = function() {
+                        healDamage(trackerId, true);  // true = тяжёлое
+                    };
                 } else if (index < filled + hard + light) {
                     box.classList.add('light');
+                    box.classList.remove('not-clickable');
+                    box.onclick = function() {
+                        healDamage(trackerId, false);  // false = лёгкое
+                    };
+                } else {
+                    box.classList.add('not-clickable');
                 }
                 // иначе остаётся пустым
             });
         }
+
+        // Отрисовка дисциплин персонажа
+        function renderCharacterDisciplines(data) {
+            const container = document.getElementById('disciplines_container');
+            if (!container) return;
+            
+            const addBtn = container.querySelector('.add-discipline-btn');
+            container.innerHTML = '';
+            if (addBtn) container.appendChild(addBtn);
+            
+            for (const [discName, discData] of Object.entries(data)) {
+                const discCard = document.createElement('div');
+                discCard.className = 'discipline-card';
+                
+                // Заголовок дисциплины
+                const header = document.createElement('div');
+                header.className = 'discipline-header';
+                header.onclick = () => showDisciplineDetails(discName);
+                
+                header.innerHTML = `
+                    <img src="${discData.info.icon || 'img/default.png'}" class="discipline-icon">
+                    <span class="discipline-title">${discName}</span>
+                    <div class="discipline-level">
+                        ${Array(5).fill(0).map((_, i) => 
+                            `<span class="dot ${i < discData.level ? 'filled' : ''} not-clickable"></span>`
+                        ).join('')}
+                    </div>
+                    <div class="discipline-actions">
+                        <button onclick="showAddPowerModal('${discName}', ${discData.level}); event.stopPropagation();">➕</button>
+                        <button onclick="removeDiscipline('${discName}'); event.stopPropagation();">❌</button>
+                    </div>
+                `;
+                
+                discCard.appendChild(header);
+                
+                // Способности дисциплины
+                if (discData.powers.length > 0) {
+                    const powersDiv = document.createElement('div');
+                    powersDiv.className = 'discipline-powers';
+                    
+                    discData.powers.forEach(powerName => {
+                        const powerItem = document.createElement('div');
+                        powerItem.className = 'power-item';
+                        powerItem.onclick = () => showPowerDetails(powerName);
+                        
+                        powerItem.innerHTML = `
+                            <span class="power-name">${powerName}</span>
+                            <span class="power-remove" onclick="removePower('${discName}', '${powerName}'); event.stopPropagation();">❌</span>
+                        `;
+                        
+                        powersDiv.appendChild(powerItem);
+                    });
+                    
+                    discCard.appendChild(powersDiv);
+                }
+                
+                container.appendChild(discCard);
+            }
+        }
+
+        // Загрузка списка дисциплин для добавления
+        function showAddDisciplineModal() {
+            pywebview.api.get_all_disciplines().then(disciplines => {
+                // Получаем список клановых дисциплин текущего персонажа
+                pywebview.api.get_clan_disciplines().then(clanDisciplines => {
+                    const listDiv = document.getElementById('disciplinesList');
+                    listDiv.innerHTML = '';
+                    
+                    disciplines.forEach(disc => {
+                        const item = document.createElement('div');
+                        item.className = 'discipline-list-item';
+                        if (clanDisciplines.includes(disc.name)) {
+                            item.classList.add('clan-discipline');
+                        }
+                        item.onclick = () => showDisciplineDetailsForAdd(disc.name);
+                        
+                        item.innerHTML = `
+                            <img src="${disc.icon || 'img/default.png'}" class="icon">
+                            <strong>${disc.name}</strong>
+                            <span class="short-desc">${disc.short_description || ''}</span>
+                            ${clanDisciplines.includes(disc.name) ? '<span class="clan-badge">Клановая</span>' : ''}
+                        `;
+                        
+                        listDiv.appendChild(item);
+                    });
+                    
+                    document.getElementById('addDisciplineModal').style.display = 'block';
+                });
+            });
+        }
+
+        // Сохраняем состояние для навигации
+        let lastDisciplineName = null;
+        let lastDisciplineLevel = null;
+
+        // Показ деталей дисциплины (из списка для добавления)
+        function showDisciplineDetailsForAdd(disciplineName) {
+            document.getElementById('disciplineBackBtn').parentElement.classList.add('with-nav');
+            document.getElementById('disciplineBackBtn').style.display = 'flex';
+            lastDisciplineName = disciplineName;  // запоминаем текущую дисциплину
+    
+            pywebview.api.get_discipline_details(disciplineName).then(details => {
+                const detailsDiv = document.getElementById('disciplineDetails');
+                detailsDiv.innerHTML = `
+                    <div class="details-content">
+                        <img src="${details.icon || 'img/default.png'}">
+                        <h2>${details.name}</h2>
+                        <p><strong>Кратко:</strong> ${details.short_description}</p>
+                        <br>
+                        <button class="add-button" onclick="addDiscipline('${details.name}')">Добавить дисциплину</button>
+                        <p><strong>Источник:</strong> ${details.source}</p>
+                        <div><strong>Общее правило:</strong> ${details.general_rule}</div>
+                        <div><strong>Описание:</strong> ${details.description}</div>
+                        <p><strong>Тип:</strong> ${details.type}</p>
+                        <p><strong>Резонанс:</strong> ${details.resonance}</p>
+                    </div>
+                `;
+                
+                closeAddDisciplineModal();
+                document.getElementById('disciplineDetailsModal').style.display = 'block';
+            });
+        }
+
+        // Добавление дисциплины персонажу
+        function addDiscipline(disciplineName) {
+            pywebview.api.add_discipline_to_character(disciplineName).then(() => {
+                closeDisciplineDetailsModal();
+            });
+        }
+
+        // Удаление дисциплины
+        function removeDiscipline(disciplineName) {
+            pywebview.api.remove_discipline_from_character(disciplineName);
+        }
+
+        // Показ модального окна для добавления способности
+        function showAddPowerModal(disciplineName, currentLevel) {
+            lastDisciplineName = disciplineName;
+            lastDisciplineLevel = currentLevel;
+
+            pywebview.api.get_discipline_powers(disciplineName, currentLevel + 1).then(powers => {
+                const listDiv = document.getElementById('powersList');
+                listDiv.innerHTML = '';
+                
+                powers.forEach(power => {
+                    const item = document.createElement('div');
+                    item.className = 'power-list-item';
+                    item.onclick = () => showPowerDetailsForAdd(power.name, disciplineName);
+                    
+                    item.innerHTML = `
+                        <strong>${power.name}</strong>
+                        <span class="short-desc">${power.short_description || ''}</span>
+                        <span class="level-required">Ур. ${power.level}</span>
+                    `;
+                    
+                    listDiv.appendChild(item);
+                });
+                
+                document.getElementById('addPowerModal').style.display = 'block';
+            });
+        }
+
+        // Показ деталей способности для добавления
+        function showPowerDetailsForAdd(powerName, disciplineName) {
+            document.getElementById('powerBackBtn').parentElement.classList.add('with-nav');
+            document.getElementById('powerBackBtn').style.display = 'flex';
+            pywebview.api.get_power_details(powerName).then(details => {
+                const detailsDiv = document.getElementById('powerDetails');
+                detailsDiv.innerHTML = `
+                    <div class="details-content">
+                        <h2>${details.name}</h2>
+                        <button class="add-button" onclick="addPower('${disciplineName}', '${details.name}')">Добавить способность</button>
+                        <p><strong>Источник:</strong> ${details.source}</p>
+                        <p><strong>Уровень:</strong> ${details.level}</p>
+                        <p><strong>Кратко:</strong> ${details.short_description}</p>
+                        <p><strong>Описание:</strong> ${details.description}</p>
+                        ${details.check_pool ? `<p><strong>Пул проверки:</strong> ${details.check_pool}</p>` : ''}
+                        ${details.reckoning ? `<p><strong>Расчет:</strong> ${details.reckoning}</p>` : ''}
+                        ${details.rule ? `<p><strong>Правило:</strong> ${details.rule}</p>` : ''}
+                        ${details.duration ? `<p><strong>Длительность:</strong> ${details.duration}</p>` : ''}
+                        ${details.amalgam ? `<p><strong>Амальгама:</strong> ${details.amalgam.dicipline_name} ${details.amalgam.level}</p>` : ''}
+                    </div>
+                `;
+                
+                closeAddPowerModal();
+                document.getElementById('powerDetailsModal').style.display = 'block';
+            });
+        }
+
+        // Добавление способности
+        function addPower(disciplineName, powerName) {
+            pywebview.api.add_power_to_character(disciplineName, powerName).then(() => {
+                closePowerDetailsModal();
+            });
+        }
+
+        // Удаление способности
+        function removePower(disciplineName, powerName) {
+            pywebview.api.remove_power_from_character(disciplineName, powerName);
+        }
+
+        // Просмотр деталей дисциплины (из листа персонажа)
+        function showDisciplineDetails(disciplineName) {
+            document.getElementById('disciplineBackBtn').parentElement.classList.remove('with-nav');
+            document.getElementById('disciplineBackBtn').style.display = 'none';
+            pywebview.api.get_discipline_details(disciplineName).then(details => {
+                const detailsDiv = document.getElementById('disciplineDetails');
+                detailsDiv.innerHTML = `
+                    <div class="details-content">
+                        <img src="${details.icon || 'img/default.png'}">
+                        <h2>${details.name}</h2>
+                        <p><strong>Источник:</strong> ${details.source}</p>
+                        <p><strong>Кратко:</strong> ${details.short_description}</p>
+                        <div><strong>Общее правило:</strong> ${details.general_rule}</div>
+                        <div><strong>Описание:</strong> ${details.description}</div>
+                        <p><strong>Тип:</strong> ${details.type}</p>
+                        <p><strong>Резонанс:</strong> ${details.resonance}</p>
+                    </div>
+                `;
+                
+                document.getElementById('disciplineDetailsModal').style.display = 'block';
+            });
+        }
+
+        // Просмотр деталей способности (из листа персонажа)
+        function showPowerDetails(powerName) {
+            document.getElementById('powerBackBtn').parentElement.classList.remove('with-nav');
+            document.getElementById('powerBackBtn').style.display = 'none';
+            pywebview.api.get_power_details(powerName).then(details => {
+                const detailsDiv = document.getElementById('powerDetails');
+                detailsDiv.innerHTML = `
+                    <div class="details-content">
+                        <h2>${details.name}</h2>
+                        <p><strong>Источник:</strong> ${details.source}</p>
+                        <p><strong>Уровень:</strong> ${details.level}</p>
+                        <p><strong>Кратко:</strong> ${details.short_description}</p>
+                        <p><strong>Описание:</strong> ${details.description}</p>
+                        ${details.check_pool ? `<p><strong>Пул проверки:</strong> ${details.check_pool}</p>` : ''}
+                        ${details.reckoning ? `<p><strong>Расчет:</strong> ${details.reckoning}</p>` : ''}
+                        ${details.rule ? `<p><strong>Правило:</strong> ${details.rule}</p>` : ''}
+                        ${details.duration ? `<p><strong>Длительность:</strong> ${details.duration}</p>` : ''}
+                        ${details.amalgam ? `<p><strong>Амальгама:</strong> ${details.amalgam.dicipline_name} ${details.amalgam.level}</p>` : ''}
+                    </div>
+                `;
+                
+                document.getElementById('powerDetailsModal').style.display = 'block';
+            });
+        }
+
+        // Функции закрытия модальных окон
+        function closeAddDisciplineModal() {
+            document.getElementById('addDisciplineModal').style.display = 'none';
+        }
+
+        function closeDisciplineDetailsModal() {
+            document.getElementById('disciplineDetailsModal').style.display = 'none';
+        }
+
+        function closeAddPowerModal() {
+            document.getElementById('addPowerModal').style.display = 'none';
+        }
+
+        function closePowerDetailsModal() {
+            document.getElementById('powerDetailsModal').style.display = 'none';
+        }
+
+        // Возврат к списку способностей
+        function backToPowersList() {
+            closePowerDetailsModal();
+            showAddPowerModal(lastDisciplineName, lastDisciplineLevel);
+        }
+
+        // Возврат к списку дисциплин из окна выбора способностей
+        function backToDisciplinesList() {
+            closeDisciplineDetailsModal();
+            showAddDisciplineModal();
+        }
+
+        // Загружаем список кланов
+        function loadClans() {
+            pywebview.api.get_clans_list().then(clans => {
+                const select = document.getElementById('clan');
+                select.innerHTML = '<option value="">Выберите клан</option>';
+                clans.forEach(clan => {
+                    const option = document.createElement('option');
+                    option.value = clan.name;
+                    option.textContent = clan.name;
+                    select.appendChild(option);
+                });
+
+                // Устанавливаем текущий клан персонажа
+                pywebview.api.get_character_clan().then(currentClan => {
+                    if (currentClan) {
+                        select.value = currentClan;
+                    }
+                });
+            });
+        }
+
+        // Обновление отображения кланового изъяна
+        function updateClanBane(clanName) {
+            if (clanName) {
+                pywebview.api.get_clan_bane(clanName).then(bane => {
+                    document.getElementById('clan_bane').innerHTML = bane;
+                });
+            } else {
+                document.getElementById('clan_bane').innerHTML = '';
+            }
+        }
+
+        // Обработчик изменения клана
+        document.getElementById('clan').addEventListener('change', function(e) {
+            const clanName = e.target.value;
+            pywebview.api.set_character_clan(clanName).then(() => {
+                pywebview.api.update_display();
+            });
+        });
+
+        function renderCharacterList() {
+            pywebview.api.save_character().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Отрисовать все преимущества
+        function renderAdvantages(advantages) {
+            const container = document.getElementById('advantages_container');
+            container.innerHTML = '';
+            for (const [name, value] of Object.entries(advantages)) {
+                const row = createAdvantageRow(name, value);
+                container.appendChild(row);
+            }
+        }
+
+        // Создать одну строку
+        function createAdvantageRow(name, value) {
+            const div = document.createElement('div');
+            div.className = 'advantage-item';
+
+            // Поле ввода названия
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = name;
+            input.placeholder = 'Название';
+            input.addEventListener('blur', function() {
+                const newName = this.value.trim();
+                if (newName && newName !== name) {
+                    pywebview.api.rename_advantage(name, newName).then(() => {
+                        refreshAdvantages();
+                    });
+                } else if (!newName) {
+                    // Если пустое, удаляем
+                    pywebview.api.remove_advantage(name).then(() => {
+                        refreshAdvantages();
+                    });
+                }
+            });
+
+            // Трекер
+            const trackerDiv = document.createElement('div');
+            trackerDiv.className = 'mutable_tracker dots';
+            trackerDiv.dataset.total = '5';
+            trackerDiv.dataset.value = value.toString();
+            trackerDiv.dataset.type = 'dot';
+            trackerDiv.dataset.advantageName = name;
+            trackerDiv.id = `adv_tracker_${Date.now()}_${Math.random()}`;
+            initTracker(trackerDiv);
+
+            // Кнопка удаления
+            const delBtn = document.createElement('span');
+            delBtn.className = 'power-remove';
+            delBtn.textContent = '❌';
+            delBtn.style.cursor = 'pointer';
+            delBtn.style.padding = '0px 10px'
+            delBtn.onclick = () => {
+                pywebview.api.remove_advantage(name).then(() => refreshAdvantages());
+            };
+
+            div.appendChild(input);
+            div.appendChild(trackerDiv);
+            div.appendChild(delBtn);
+            return div;
+        }
+
+        // Обновить весь список
+        function refreshAdvantages() {
+            pywebview.api.get_advantages().then(data => {
+                renderAdvantages(data);
+            });
+        }
+
+        // Добавить новое преимущество
+        function addNewAdvantage() {
+            const baseName = 'Новое преимущество';
+            pywebview.api.get_advantages().then(data => {
+                let counter = 1;
+                let newName = baseName;
+                while (data.hasOwnProperty(newName)) {
+                    counter++;
+                    newName = `${baseName} ${counter}`;
+                }
+                pywebview.api.add_advantage(newName).then(() => refreshAdvantages());
+            });
+        }
+
+        // Загружаем сохранённые значения из Python при старте
+        window.addEventListener('pywebviewready', function() {
+            console.log('pywebviewready');
+            // Загружаем текстовые поля
+            pywebview.api.get_autofilled_texts().then(fields => {
+                updateAllAutofilledTextFields(fields);
+            });
+
+            // Загружаем дисциплины персонажа
+            pywebview.api.get_character_disciplines().then(disciplines => {
+                renderCharacterDisciplines(disciplines);
+            });
+
+            loadClans();
+            refreshAdvantages();   // загружаем преимущества
+
+            pywebview.api.get_basic_trackers().then(attributes => {
+                // Обновляем все трекеры согласно загруженным значениям
+                for (const [attrId, value] of Object.entries(attributes)) {
+                    const tracker = document.getElementById(attrId);
+                    if (tracker) {
+                        tracker.dataset.value = value;
+                        
+                        // Переинициализируем трекер с новым значением
+                        initTracker(tracker);
+                    }
+                }
+            });
+
+            // Настраиваем автосохранение
+            setupAutoSave();
+        });
     </script>
 </body>
 </html>

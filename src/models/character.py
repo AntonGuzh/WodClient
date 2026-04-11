@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict
+from dataclasses_json import dataclass_json
+from typing import List, Dict
 
+
+@dataclass_json
 @dataclass
 class VampireCharacter:
     # Основная информация (шапка)
@@ -73,7 +76,7 @@ class VampireCharacter:
     finance: int = 0  # Финансы
     
     # Дисциплины (Disciplines)
-    disciplines: Dict[str, int] = field(default_factory=dict)
+    disciplines: Dict[str, List[str]] = field(default_factory=dict)
     
     # Преимущества и недостатки (Advantages & Flaws)
     advantages: Dict[str, int] = field(default_factory=dict)
@@ -93,20 +96,14 @@ class VampireCharacter:
     
     # Сила Крови (Blood Potency)
     blood_potency: int = 1  # Сила Крови (max 10)
-    blood_surge_modifier: str = ""  # Модификатор прилива Крови
-    healing: str = ""  # Заживление
-    discipline_pool_modifier: str = ""  # Модификатор пула Дисциплин
-    blood_reroll: str = ""  # Повторное испытание Крови (уровень силы)
-    feeding_penalty: str = ""  # Проблемы с питанием
-    bane_severity: str = ""  # Тяжесть изъяна
     
     # Опыт
-    total_experience: int = ""  # Всего пунктов опыта
-    spent_experience: int = ""  # Потрачено пунктов опыта
+    total_experience: int = 0  # Всего пунктов опыта
+    spent_experience: int = 0  # Потрачено пунктов опыта
     
     # Возраст и внешность
-    true_age: int = ""  # Истинный возраст
-    apparent_age: int = ""  # Видимый возраст
+    true_age: int = 100  # Истинный возраст
+    apparent_age: int = 30  # Видимый возраст
     date_of_birth: str = ""  # Дата рождения
     date_of_death: str = ""  # Дата смерти
     
@@ -204,17 +201,60 @@ class VampireCharacter:
         """Возвращает максимальное значение воли вампира"""
         return self.resolve + self.composure
     
-    def add_discipline(self, name: str, level: int) -> None:
-        """Добавляет или обновляет уровень дисциплины"""
-        self.disciplines[name] = level
+    def add_discipline(self, discipline_name: str) -> None:
+        """Добавляет дисциплину персонажу"""
+        if discipline_name not in self.disciplines:
+            self.disciplines[discipline_name] = []
     
-    def add_advantage(self, name: str, level: int) -> None:
-        """Добавляет преимущество"""
-        self.advantages[name] = level
+    def remove_discipline(self, discipline_name: str) -> None:
+        """Удаляет дисциплину и все её способности"""
+        if discipline_name in self.disciplines:
+            del self.disciplines[discipline_name]
     
-    def add_flaw(self, name: str, level: int) -> None:
-        """Добавляет недостаток"""
-        self.flaws[name] = level
+    def add_power(self, power_name: str, discipline_name: str) -> None:
+        """Добавляет способность дисциплины"""
+        if discipline_name in self.disciplines:
+            if power_name not in self.disciplines[discipline_name]:
+                self.disciplines[discipline_name].append(power_name)
+    
+    def remove_power(self, discipline_name: str, power_name: str) -> None:
+        """Удаляет способность дисциплины"""
+        if discipline_name in self.disciplines:
+            if power_name in self.disciplines[discipline_name]:
+                self.disciplines[discipline_name].remove(power_name)
+    
+    def get_discipline_level(self, discipline_name: str) -> int:
+        """Возвращает уровень дисциплины (количество способностей)"""
+        return len(self.disciplines.get(discipline_name, []))
+    
+    def update_advantage(self, name: str, value: int) -> bool:
+        """Обновить значение преимущества/недостатка (0-5)"""
+        if 0 <= value <= 5 and name in self.advantages:
+            self.advantages[name] = value
+            return True
+        return False
+
+    def add_advantage(self, name: str) -> bool:
+        """Добавить новое преимущество с 0 точками"""
+        if name in self.advantages or not name.strip():
+            return False
+        self.advantages[name.strip()] = 0
+        return True
+
+    def remove_advantage(self, name: str) -> bool:
+        """Удалить преимущество по названию"""
+        if name in self.advantages:
+            del self.advantages[name]
+            return True
+        return False
+
+    def rename_advantage(self, old_name: str, new_name: str) -> bool:
+        """Переименовать преимущество"""
+        if old_name in self.advantages and new_name not in self.advantages and new_name.strip():
+            value = self.advantages.pop(old_name)
+            self.advantages[new_name.strip()] = value
+            return True
+        return False
     
     def update(self, attr_name: str, value: int) -> bool:
         """Обновляет значение атрибута"""
@@ -252,7 +292,7 @@ class VampireCharacter:
             self.light_willpower_damage += min(0, remaining_willpower - damage) # Остаток тяжелых повреждений перекрывает легкие
         else:
             self.light_willpower_damage += min(damage, remaining_willpower)
-            self.add_willpower_damage(damage - remaining_willpower, True, False) # Остаток становится тяжелыми повреждениями
+            self.add_willpower_damage(max(0, damage - remaining_willpower), True, False) # Остаток становится тяжелыми повреждениями
 
         self.hard_willpower_damage = min(self.get_max_willpower(), self.hard_willpower_damage)
         self.light_willpower_damage = max(0, self.light_willpower_damage)
@@ -270,3 +310,96 @@ class VampireCharacter:
             'light_willpower_damage': self.light_willpower_damage,
             'willpower_exhausted': self.willpower_exhausted,
         }
+    
+    def get_blood_stats(self) -> Dict[str, int]:
+        base_stat_block = {
+            0: {
+                'blood_surge_modifier': '+1d10',  # Модификатор прилива Крови
+                'healing': '1 лёгкое повреждение',  # Заживление
+                'discipline_pool_modifier': 'Нет',  # Модификатор пула Дисциплин
+                'blood_reroll': 'Нет',  # Повторное испытание Крови (уровень силы)
+                'feeding_penalty': 'Нет',  # Проблемы с питанием
+                'bane_severity': '0'  # Тяжесть изъяна
+            },
+            1: {
+                'blood_surge_modifier': '+2d10',
+                'healing': '1 лёгкое повреждение',
+                'discipline_pool_modifier': 'Нет',
+                'blood_reroll': 'Уровень 1',
+                'feeding_penalty': 'Нет',
+                'bane_severity': '2'
+            },
+            2: {
+                'blood_surge_modifier': '+2d10',
+                'healing': '2 лёгких повреждения',
+                'discipline_pool_modifier': '+1d10',
+                'blood_reroll': 'Уровень 1',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных  утоляет Голод в 2 раза хуже',
+                'bane_severity': '2'
+            },
+            3: {
+                'blood_surge_modifier': '+3d10',
+                'healing': '2 лёгких повреждения',
+                'discipline_pool_modifier': '+1d10',
+                'blood_reroll': 'Уровень 1-2',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных вообще не утоляет Голод',
+                'bane_severity': '3'
+            },
+            4: {
+                'blood_surge_modifier': '+3d10',
+                'healing': '3 лёгких повреждения',
+                'discipline_pool_modifier': '+2d10',
+                'blood_reroll': 'Уровень 1-2',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных вообще не утоляет Голод. Укусив человека, вампир убирает на 1 пункт Голода меньше',
+                'bane_severity': '3'
+            },
+            5: {
+                'blood_surge_modifier': '+4d10',
+                'healing': '3 лёгких повреждения',
+                'discipline_pool_modifier': '+2d10',
+                'blood_reroll': 'Уровень 1-3',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных вообще не утоляет Голод. Укусив человека, вампир убирает на 1 пункт Голода меньше. Не убивая человека, вампир может снизить значение Голода только до 2',
+                'bane_severity': '4'
+            },
+            6: {
+                'blood_surge_modifier': '+4d10',
+                'healing': '3 лёгких повреждения',
+                'discipline_pool_modifier': '+3d10',
+                'blood_reroll': 'Уровень 1-3',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных вообще не утоляет Голод. Укусив человека, вампир убирает на 2 пункта Голода меньше. Не убивая человека, вампир может снизить значение Голода только до 2',
+                'bane_severity': '4'
+            },
+            7: {
+                'blood_surge_modifier': '+5d10',
+                'healing': '3 лёгких повреждения',
+                'discipline_pool_modifier': '+3d10',
+                'blood_reroll': 'Уровень 1-4',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных вообще не утоляет Голод. Укусив человека, вампир убирает на 2 пункта Голода меньше. Не убивая человека, вампир может снизить значение Голода только до 2',
+                'bane_severity': '5'
+            },
+            8: {
+                'blood_surge_modifier': '+5d10',
+                'healing': '4 лёгких повреждения',
+                'discipline_pool_modifier': '+4d10',
+                'blood_reroll': 'Уровень 1-4',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных вообще не утоляет Голод. Укусив человека, вампир убирает на 2 пункта Голода меньше. Не убивая человека, вампир может снизить значение Голода только до 2',
+                'bane_severity': '5'
+            },
+            9: {
+                'blood_surge_modifier': '+6d10',
+                'healing': '4 лёгких повреждения',
+                'discipline_pool_modifier': '+4d10',
+                'blood_reroll': 'Уровень 1-5',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных вообще не утоляет Голод. Укусив человека, вампир убирает на 2 пункта Голода меньше. Не убивая человека, вампир может снизить значение Голода только до 3',
+                'bane_severity': '6'
+            },
+            10: {
+                'blood_surge_modifier': '+6d10',
+                'healing': '5 лёгких повреждений',
+                'discipline_pool_modifier': '+5d10',
+                'blood_reroll': 'Уровень 1-5',
+                'feeding_penalty': 'Донорская кровь из пакетов и кровь животных вообще не утоляет Голод. Укусив человека, вампир убирает на 3 пункта Голода меньше. Не убивая человека, вампир может снизить значение Голода только до 3',
+                'bane_severity': '6'
+            }
+        }
+        return base_stat_block[self.blood_potency]

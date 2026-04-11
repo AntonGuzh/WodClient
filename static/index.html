@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои персонажи - Вампиры: Маскарад</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="characters-page">
+        <h1>Мои персонажи</h1>
+        <div id="charactersGrid" class="characters-grid">
+            <!-- Карточки будут вставлены динамически -->
+        </div>
+    </div>
+
+    <script>
+        function loadCharacters() {
+            pywebview.api.get_character_list().then(characters => {
+                const grid = document.getElementById('charactersGrid');
+                grid.innerHTML = ''; // очищаем
+
+                characters.forEach(char => {
+                    const card = document.createElement('div');
+                    card.className = 'character-card';
+                    card.onclick = () => openCharacter(char.file_path);
+
+                    card.innerHTML = `
+                        <div class="name">${escapeHtml(char.name) || 'Без имени'}</div>
+                        <div class="details">
+                            <div class="detail-item">
+                                <span class="detail-label">Сир</span>
+                                <span class="detail-value">${escapeHtml(char.sire) || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Поколение</span>
+                                <span class="detail-value">${char.generation || '?'}</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                // Добавляем карточку создания нового персонажа
+                const newCard = document.createElement('div');
+                newCard.className = 'character-card new';
+                newCard.onclick = createNewCharacter;
+                newCard.innerHTML = '<span>+</span>';
+                grid.appendChild(newCard);
+            });
+        }
+
+        // Экранирование HTML для безопасного отображения
+        function escapeHtml(unsafe) {
+            if (!unsafe) return unsafe;
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function openCharacter(filePath) {
+            // Передаём путь к файлу в Python и загружаем страницу персонажа
+            pywebview.api.load_character(filePath).then(() => {
+                // После загрузки данных переходим на страницу персонажа
+                window.location.href = 'character_sheet.html';
+            });
+        }
+
+        function createNewCharacter() {
+            pywebview.api.create_new_character().then(() => {
+                window.location.href = 'character_sheet.html';
+            });
+        }
+
+        // Загружаем список при готовности окна
+        window.addEventListener('pywebviewready', loadCharacters);
+    </script>
+</body>
+</html>

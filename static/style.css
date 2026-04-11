@@ -51,6 +51,7 @@ body {
     border-bottom: 1px solid #333;
     font-size: 14px;
     font-family: inherit;
+    background-color: transparent;
 }
 
 .field input:focus {
@@ -250,6 +251,15 @@ body {
     flex: 1;
 }
 
+.not-clickable {
+    cursor: default !important;
+    pointer-events: none;
+}
+
+.not-clickable:hover {
+    background-color: transparent;
+}
+
 /* Дисциплины */
 .disciplines {
     display: flex;
@@ -275,6 +285,27 @@ body {
 .discipline input:focus {
     outline: none;
     border-bottom-color: #8b0000;
+}
+
+/* Подсветка клановых дисциплин в списке */
+.discipline-list-item.clan-discipline {
+    border-left: 4px solid #8b0000;
+    background-color: #fff0f0;
+}
+
+/* Подсветка клановых дисциплин на листе персонажа */
+.discipline-card.clan-discipline {
+    border-left: 4px solid #8b0000;
+}
+
+/* Метка "Клановая" */
+.clan-badge {
+    background-color: #8b0000;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    margin-left: 8px;
 }
 
 /* Правая колонка */
@@ -350,6 +381,10 @@ body {
 
 .info-item {
     margin-bottom: 8px;
+}
+
+.info-item p {
+    font-size: 13px;
 }
 
 .info-item label {
@@ -507,4 +542,542 @@ body {
     display: flex;
     gap: 5px;
     margin-left: 10px;
+}
+
+/* Стили для блока кнопок */
+.action-buttons {
+    position: fixed;
+    flex-direction: column;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.action-buttons span {
+    height: 30px;
+}
+
+.action-btn {
+    padding: 30px 20px;
+    background-color: #8b0000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.action-btn:hover {
+    background-color: #a52a2a;
+}
+
+/* Стили для модальных окон */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1001;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #f5f5f5;
+    margin: 10% auto;
+    padding: 20px;
+    border: 2px solid #8b0000;
+    border-radius: 10px;
+    width: 500px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    text-align: left;
+}
+
+.modal input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.toggle-group {
+    margin: 15px 0;
+    text-align: left;
+}
+
+.toggle-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.toggle-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.modal-submit {
+    width: 100%;
+    padding: 10px;
+    background-color: #8b0000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.modal-submit:hover {
+    background-color: #a52a2a;
+}
+
+.modal h3 {
+    color: #8b0000;
+    margin-top: 0;
+    border-bottom: 1px solid #8b0000;
+    padding-bottom: 10px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    position: relative;
+    min-height: 40px;
+}
+
+.modal-header {
+    justify-content: flex-end;
+}
+
+.modal-header.with-nav {
+    justify-content: space-between;
+}
+
+/* Кнопки навигации */
+.nav-btn, .close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    border-radius: 50%;
+    transition: all 0.2s;
+    user-select: none;
+    color: #666;
+}
+
+.nav-btn:hover, .close-btn:hover {
+    color: #000;
+}
+
+/* Тело модального окна */
+.modal-body {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Чтобы контент не залезал под кнопки */
+.character-sheet {
+    margin-right: 200px;
+}
+
+@media (max-width: 768px) {
+    .character-sheet {
+        margin-right: 0;
+        margin-top: 70px;
+    }
+}
+
+/* Стили для изображений кубиков */
+.dice-image {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+/* Дисциплины */
+.disciplines-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: transparent;
+}
+
+.discipline-card {
+    border: 1px solid #8b0000;
+    border-radius: 8px;
+    padding: 10px;
+    background: transparent;
+}
+
+.discipline-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.discipline-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.discipline-title {
+    flex-grow: 1;
+    font-weight: bold;
+}
+
+.discipline-level {
+    display: flex;
+    gap: 3px;
+    margin-right: 10px;
+}
+
+.discipline-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #8b0000;
+}
+
+.discipline-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.discipline-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+}
+
+.discipline-actions button:hover {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+.discipline-powers {
+    margin-top: 10px;
+    margin-left: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.power-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.power-item:hover {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+.power-name {
+    flex-grow: 1;
+}
+
+.power-remove {
+    color: #8b0000;
+    font-size: 18px;
+}
+
+.add-discipline-btn {
+    padding: 10px;
+    border: 2px dashed #8b0000;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    color: #8b0000;
+}
+
+.add-discipline-btn:hover {
+    background: #fff0f0;
+}
+
+/* Модальные окна */
+.modal-wide {
+    width: 600px;
+    max-width: 90%;
+}
+
+.disciplines-list, .powers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.discipline-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.discipline-list-item:hover {
+    background: #f0f0f0;
+}
+
+.discipline-list-item .icon {
+    width: 30px;
+    height: 30px;
+}
+
+.discipline-list-item .short-desc {
+    flex-grow: 1;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.power-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.power-list-item:hover {
+    background: #f0f0f0;
+}
+
+.power-list-item .level-required {
+    background: #666;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+}
+
+.details-content {
+    padding: 20px;
+}
+
+.details-content img {
+    max-width: 70px;
+    float: left;
+    margin-right: 20px;
+}
+
+.details-content p {
+    margin: 10px 0;
+}
+
+.add-button {
+    background: #8b0000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.add-button:hover {
+    background: #a52a2a;
+}
+
+/* Стили для поля выбора клана */
+.field select {
+    width: 100%;
+    padding: 5px 0;          /* как у input */
+    border: none;
+    border-bottom: 1px solid #333;
+    font-size: 14px;         /* такой же размер, как у input */
+    font-family: inherit;    /* наследуем шрифт */
+    background-color: transparent;
+    appearance: none;        /* убираем стандартную стрелку */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    color: #333;
+    line-height: normal;
+}
+
+/* Убираем обводку при фокусе */
+.field select:focus {
+    outline: none;
+    border-bottom-color: #8b0000;
+}
+
+/* Добавляем кастомную стрелку справа */
+.field {
+    position: relative;
+}
+
+.field::after {
+    content: '▼';
+    font-size: 10px;
+    color: #666;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* Убираем стрелку для других полей, если они используют .field */
+.field:has(input)::after {
+    display: none;
+}
+
+/* Специфические стили для страницы списка персонажей */
+.characters-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    background-color: #faf4e9;
+    min-height: 100vh;
+}
+
+.characters-page h1 {
+    text-align: center;
+    color: #8b0000;
+    font-size: 28px;
+    margin-bottom: 40px;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    border-bottom: 2px solid #8b0000;
+    padding-bottom: 15px;
+}
+
+.characters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.character-card {
+    background: #f5f0e5;
+    border: 1px solid #8b0000;
+    border-radius: 12px;
+    padding: 20px 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    height: 150px;
+    width: 270px;
+}
+
+.character-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(139,0,0,0.2);
+}
+
+.character-card .name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #8b0000;
+    padding-bottom: 8px;
+}
+
+.character-card .details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #555;
+}
+
+.character-card .detail-item {
+    display: flex;
+    align-items: baseline;
+}
+
+.character-card .detail-label {
+    font-weight: bold;
+    width: 100px;
+    color: #8b0000;
+    font-size: 14px;
+}
+
+.character-card .detail-value {
+    font-size: 16px;
+    color: #333;
+}
+
+/* Пустая карточка для создания нового персонажа */
+.character-card.new {
+    border: 2px dashed #8b0000;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    color: #8b0000;
+    cursor: pointer;
+    padding: 0;
+    height: 150px;
+    width: 270px;
+}
+
+.character-card.new:hover {
+    background: rgba(139,0,0,0.05);
+    transform: none;
+}
+
+.character-card.new span {
+    font-size: 80px;
+    line-height: 1;
+}
+
+.add-advantage-btn {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background: none;
+    border: 1px dashed #8b0000;
+    color: #8b0000;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 5px;
+    width: 100%;
+}
+.add-advantage-btn:hover {
+    background: #fff0f0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .characters-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
 }

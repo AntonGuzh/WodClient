@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D10 Dice Roller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        #ui {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        label {
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        #diceCount {
+            width: 60px;
+            padding: 8px 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            text-align: center;
+        }
+        
+        #rollButton {
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #rollButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        #rollButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #result {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        #result h2 {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        #resultValues {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        #resultTotal {
+            color: #4ade80;
+            font-size: 32px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="ui">
+        <label for="diceCount">Количество d10:</label>
+        <input type="number" id="diceCount" min="1" max="10" value="2">
+        <button id="rollButton">🎲 Бросить!</button>
+    </div>
+    
+    <div id="result">
+        <h2>Результат</h2>
+        <div id="resultValues">-</div>
+        <div id="resultTotal">0</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    
+    <script>
+        // Геометрия d10
+        const vertexes = [
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 0.4858682718, 0],
+            [1, 0.4858682718, -1],
+            [0.6180339888, 0.7861513778, 0],
+            [0, 0.4858682718, -1],
+            [0, 0, -1],
+            [0.3819660112, -0.300283106, -1],
+            [1, -0.300283106, -0.3819660112],
+            [0, 0.7861513778, -0.6180339888],
+            [0.6180339887, -0.4858682718, -0.6180339887],
+            [0.3819660113, 0.9717365435, -0.3819660113],
+        ];
+
+        const faceData = [
+            { tris: [[0,1,2],[0,2,4]], label: '0' },
+            { tris: [[0,10,8],[0,8,1]], label: '8' },
+            { tris: [[0,6,7],[0,7,10]], label: '6' },
+            { tris: [[0,9,5],[0,5,6]], label: '4' },
+            { tris: [[0,4,11],[0,11,9]], label: '2' },
+            { tris: [[3,2,1],[3,1,8]], label: '5' },
+            { tris: [[3,8,10],[3,10,7]], label: '7' },
+            { tris: [[3,7,6],[3,6,5]], label: '9' },
+            { tris: [[3,5,9],[3,9,11]], label: '1' },
+            { tris: [[3,11,4],[3,4,2]], label: '3' },
+        ];
+
+        // Глобальные переменные
+        let scene, camera, renderer;
+        let world;
+        let dice = [];
+        let diceBodies = [];
+        let isRolling = false;
+        let floor, floorBody;
+        let wallBodies = [];
+
+        const SCALE = 1.5;
+        const CENTER = [0.5, 0.2429341359, -0.5];
+
+        // Инициализация
+        init();
+        animate();
+
+        function init() {
+            // Three.js сцена
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+
+            // Камера - вид строго сверху
+            const aspect = window.innerWidth / window.innerHeight;
+            const viewSize = 12;
+            camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
+            camera.position.set(0, 20, 0);
+            camera.lookAt(0, 0, 0);
+            camera.up.set(0, 0, -1);
+
+            // Рендерер
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Освещение
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 20, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 50;
+            directionalLight.shadow.camera.left = -15;
+            directionalLight.shadow.camera.right = 15;
+            directionalLight.shadow.camera.top = 15;
+            directionalLight.shadow.camera.bottom = -15;
+            scene.add(directionalLight);
+
+            // Cannon.js физический мир
+            world = new CANNON.World();
+            world.gravity.set(0, -30, 0);
+            world.broadphase = new CANNON.NaiveBroadphase();
+            world.solver.iterations = 20;
+
+            // Создание пола
+            createFloor();
+            
+            // Создание стен
+            createWalls();
+
+            // Обработчики событий
+            document.getElementById('rollButton').addEventListener('click', rollDice);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createFloor() {
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x2d3748,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            const floorShape = new CANNON.Plane();
+            const floorBody = new CANNON.Body({ mass: 0 });
+            floorBody.addShape(floorShape);
+            floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            world.addBody(floorBody);
+        }
+
+        function createWalls() {
+            const wallPositions = [
+                { pos: [0, 2, -8], rot: [0, 0, 0] },
+                { pos: [0, 2, 8], rot: [0, Math.PI, 0] },
+                { pos: [-8, 2, 0], rot: [0, Math.PI / 2, 0] },
+                { pos: [8, 2, 0], rot: [0, -Math.PI / 2, 0] }
+            ];
+
+            wallPositions.forEach(wall => {
+                const wallShape = new CANNON.Plane();
+                const wallBody = new CANNON.Body({ mass: 0 });
+                wallBody.addShape(wallShape);
+                wallBody.position.set(...wall.pos);
+                wallBody.quaternion.setFromEuler(wall.rot[0], wall.rot[1], wall.rot[2]);
+                world.addBody(wallBody);
+                wallBodies.push(wallBody);
+            });
+        }
+
+        // Создание текстуры для грани с номером
+        function createFaceTexture(label) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            
+            // Фон грани - тёмно-красный
+            ctx.fillStyle = '#2c2c2c';
+            ctx.fillRect(0, 0, 256, 256);
+            
+            // Добавляем немного градиента для объёма
+            const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 180);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 256, 256);
+            
+            // Рисуем номер
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 140px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Тень для текста
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            
+            ctx.fillText(label, 128, 128);
+            
+            // Обводка
+            ctx.shadowColor = 'transparent';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.strokeText(label, 128, 128);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.needsUpdate = true;
+            return texture;
+        }
+
+        // Вычисление UV координат для грани (ромбовидная форма из 2 треугольников)
+        function computeFaceUVs(faceIndex) {
+            const face = faceData[faceIndex];
+            
+            // Получаем все уникальные вершины грани
+            const uniqueIndices = [];
+            face.tris.forEach(tri => {
+                tri.forEach(idx => {
+                    if (!uniqueIndices.includes(idx)) {
+                        uniqueIndices.push(idx);
+                    }
+                });
+            });
+            
+            // Получаем 3D координаты вершин
+            const vertices3D = uniqueIndices.map(idx => new THREE.Vector3(
+                (vertexes[idx][0] - CENTER[0]) * SCALE,
+                (vertexes[idx][1] - CENTER[1]) * SCALE,
+                (vertexes[idx][2] - CENTER[2]) * SCALE,
+            ));
+            
+            // Вычисляем центр грани
+            const center = new THREE.Vector3();
+            vertices3D.forEach(v => center.add(v));
+            center.divideScalar(vertices3D.length);
+            
+            // Вычисляем нормаль грани
+            const v0 = vertices3D[0];
+            const v1 = vertices3D[1];
+            const v2 = vertices3D[2];
+            const edge1 = new THREE.Vector3().subVectors(v1, v0);
+            const edge2 = new THREE.Vector3().subVectors(v2, v0);
+            const normal = new THREE.Vector3().crossVectors(edge1, edge2).normalize();
+            
+            // Создаём локальную систему координат на грани
+            let bitangent = new THREE.Vector3().subVectors(center, v2);
+            let tangent = new THREE.Vector3().crossVectors(normal, bitangent).normalize();
+            tangent = new THREE.Vector3(-tangent.x, -tangent.y, -tangent.z)
+
+            console.log(bitangent)
+            console.log(tangent)
+            
+            // Проецируем вершины на 2D плоскость
+            const projected2D = vertices3D.map(v => {
+                const relative = new THREE.Vector3().subVectors(v, center);
+                return new THREE.Vector2(
+                    relative.dot(tangent),
+                    relative.dot(bitangent)
+                );
+            });
+            
+            // Находим границы для нормализации
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+            projected2D.forEach(p => {
+                minX = Math.min(minX, p.x);
+                maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y);
+                maxY = Math.max(maxY, p.y);
+            });
+            
+            const rangeX = maxX - minX || 1;
+            const rangeY = maxY - minY || 1;
+            const maxRange = Math.max(rangeX, rangeY);
+            
+            // Нормализуем UV в диапазон [0, 1] с сохранением пропорций
+            const uvMap = {};
+            uniqueIndices.forEach((idx, i) => {
+                const p = projected2D[i];
+                uvMap[idx] = new THREE.Vector2(
+                    (p.x - minX + (maxRange - rangeX) / 2) / maxRange,
+                    -0.15 + (p.y - minY + (maxRange - rangeY) / 2) / maxRange * 1.45
+                );
+            });
+            
+            return uvMap;
+        }
+
+        function createD10() {
+            const group = new THREE.Group();
+            
+            // Создаем каждую грань как отдельный меш с текстурой
+            faceData.forEach((face, faceIndex) => {
+                const geometry = new THREE.BufferGeometry();
+                const positions = [];
+                const uvs = [];
+                const indices = [];
+                
+                // Вычисляем UV для этой грани
+                const uvMap = computeFaceUVs(faceIndex);
+                
+                // Собираем вершины и UV
+                const vertexMap = new Map(); // idx -> localIndex
+                let localIndex = 0;
+                
+                face.tris.forEach(tri => {
+                    tri.forEach(idx => {
+                        if (!vertexMap.has(idx)) {
+                            const v = vertexes[idx];
+                            positions.push(
+                                (v[0] - CENTER[0]) * SCALE,
+                                (v[1] - CENTER[1]) * SCALE,
+                                (v[2] - CENTER[2]) * SCALE
+                            );
+                            
+                            const uv = uvMap[idx];
+                            uvs.push(uv.x, uv.y);
+                            
+                            vertexMap.set(idx, localIndex);
+                            localIndex++;
+                        }
+                    });
+                });
+                
+                // Создаём индексы
+                face.tris.forEach(tri => {
+                    indices.push(
+                        vertexMap.get(tri[0]),
+                        vertexMap.get(tri[1]),
+                        vertexMap.get(tri[2])
+                    );
+                });
+                
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+                geometry.setIndex(indices);
+                geometry.computeVertexNormals();
+                
+                // Материал с текстурой
+                const texture = createFaceTexture(face.label);
+                const material = new THREE.MeshStandardMaterial({
+                    map: texture,
+                    roughness: 0.3,
+                    metalness: 0.5,
+                    side: THREE.DoubleSide
+                });
+                
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                group.add(mesh);
+            });
+            
+            return group;
+        }
+
+        function createD10PhysicsBody() {
+            const vertices = [];
+
+            vertexes.forEach(v => {
+                vertices.push(new CANNON.Vec3(
+                    (v[0] - CENTER[0]) * SCALE,
+                    (v[1] - CENTER[1]) * SCALE,
+                    (v[2] - CENTER[2]) * SCALE
+                ));
+            });
+
+            const faces = [];
+            faceData.forEach(face => {
+                face.tris.forEach(tri => {
+                    faces.push(tri);
+                });
+            });
+
+            const shape = new CANNON.ConvexPolyhedron(vertices, faces);
+
+            const body = new CANNON.Body({
+                mass: 1,
+                shape: shape,
+                material: new CANNON.Material({ friction: 0.5, restitution: 0.3 })
+            });
+
+            body.linearDamping = 0.3;
+            body.angularDamping = 0.3;
+
+            return body;
+        }
+
+        function clearDice() {
+            dice.forEach(d => scene.remove(d));
+            diceBodies.forEach(b => world.removeBody(b));
+            dice = [];
+            diceBodies = [];
+        }
+
+        function rollDice() {
+            if (isRolling) return;
+            isRolling = true;
+            document.getElementById('rollButton').disabled = true;
+            document.getElementById('resultValues').textContent = 'Бросаем...';
+            document.getElementById('resultTotal').textContent = '🎲';
+
+            clearDice();
+
+            const count = parseInt(document.getElementById('diceCount').value) || 1;
+            const clampedCount = Math.min(Math.max(count, 1), 10);
+
+            for (let i = 0; i < clampedCount; i++) {
+                const d10 = createD10();
+                const body = createD10PhysicsBody();
+
+                const angle = (i / clampedCount) * Math.PI * 2;
+                const radius = 2;
+                const x = Math.cos(angle) * radius + (Math.random() - 0.5) * 2;
+                const z = Math.sin(angle) * radius + (Math.random() - 0.5) * 2;
+
+                body.position.set(x, 8 + Math.random() * 3, z);
+                
+                body.quaternion.setFromEuler(
+                    Math.random() * Math.PI * 2,
+                    Math.random() * Math.PI * 2,
+                    Math.random() * Math.PI * 2
+                );
+
+                body.velocity.set(
+                    (Math.random() - 0.5) * 10,
+                    -5,
+                    (Math.random() - 0.5) * 10
+                );
+                body.angularVelocity.set(
+                    (Math.random() - 0.5) * 20,
+                    (Math.random() - 0.5) * 20,
+                    (Math.random() - 0.5) * 20
+                );
+
+                scene.add(d10);
+                world.addBody(body);
+                dice.push(d10);
+                diceBodies.push(body);
+            }
+
+            setTimeout(checkDiceStopped, 500);
+        }
+
+        function checkDiceStopped() {
+            const threshold = 0.1;
+            let allStopped = true;
+
+            diceBodies.forEach(body => {
+                const v = body.velocity;
+                const av = body.angularVelocity;
+                const speed = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+                const angSpeed = Math.sqrt(av.x * av.x + av.y * av.y + av.z * av.z);
+                
+                if (speed > threshold || angSpeed > threshold) {
+                    allStopped = false;
+                }
+            });
+
+            if (allStopped) {
+                calculateResults();
+            } else {
+                setTimeout(checkDiceStopped, 100);
+            }
+        }
+
+        function calculateResults() {
+            const results = [];
+
+            dice.forEach((d10, index) => {
+                const result = getTopFace(diceBodies[index]);
+                results.push(result);
+            });
+
+            const total = results.reduce((sum, val) => sum + val, 0);
+            
+            document.getElementById('resultValues').textContent = results.join(' + ');
+            document.getElementById('resultTotal').textContent = total;
+            
+            isRolling = false;
+            document.getElementById('rollButton').disabled = false;
+        }
+
+        function getTopFace(body) {
+            const upVector = new CANNON.Vec3(0, 1, 0);
+            let maxDot = -Infinity;
+            let topFaceIndex = 0;
+
+            faceData.forEach((face, index) => {
+                const tri = face.tris[0];
+
+                const v0 = vertexes[tri[0]];
+                const v1 = vertexes[tri[1]];
+                const v2 = vertexes[tri[2]];
+
+                const edge1 = new CANNON.Vec3(
+                    (v1[0] - v0[0]) * SCALE,
+                    (v1[1] - v0[1]) * SCALE,
+                    (v1[2] - v0[2]) * SCALE
+                );
+                const edge2 = new CANNON.Vec3(
+                    (v2[0] - v0[0]) * SCALE,
+                    (v2[1] - v0[1]) * SCALE,
+                    (v2[2] - v0[2]) * SCALE
+                );
+
+                const normal = new CANNON.Vec3();
+                edge1.cross(edge2, normal);
+                normal.normalize();
+
+                const rotatedNormal = body.quaternion.vmult(normal);
+
+                const dot = rotatedNormal.dot(upVector);
+                if (dot > maxDot) {
+                    maxDot = dot;
+                    topFaceIndex = index;
+                }
+            });
+
+            return parseInt(faceData[topFaceIndex].label);
+        }
+
+        function onWindowResize() {
+            const aspect = window.innerWidth / window.innerHeight;
+            const viewSize = 12;
+            
+            camera.left = -viewSize * aspect;
+            camera.right = viewSize * aspect;
+            camera.top = viewSize;
+            camera.bottom = -viewSize;
+            camera.updateProjectionMatrix();
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            world.step(1 / 60);
+
+            dice.forEach((d10, index) => {
+                const body = diceBodies[index];
+                d10.position.copy(body.position);
+                d10.quaternion.copy(body.quaternion);
+            });
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
