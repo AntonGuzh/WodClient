@@ -24,17 +24,17 @@ jobs:
           - os: windows-latest
             output_name: wod_character_sheet.exe
             asset_name: wod_character_sheet-windows.exe
-            pyinstaller_args: --onefile --windowed --icon=static/img/favicon.ico --add-data "static;static" --add-data "src;src" --add-data "utils.py;."
+            pyinstaller_args: --onefile --windowed --icon=static/img/favicon.ico --add-data "static;static" --add-data "src;src"
           
           - os: macos-latest
             output_name: wod_character_sheet
             asset_name: wod_character_sheet-macos
-            pyinstaller_args: --onefile --windowed --icon=static/img/favicon.icns --add-data "static:static" --add-data "src:src" --add-data "utils.py:."
+            pyinstaller_args: --windowed --onedir --icon=static/img/favicon.icns --add-data "static:static" --add-data "src:src"
           
           - os: ubuntu-latest
             output_name: wod_character_sheet
             asset_name: wod_character_sheet-linux
-            pyinstaller_args: --onefile --windowed --add-data "static:static" --add-data "src:src" --add-data "utils.py:."
+            pyinstaller_args: --onefile --windowed --add-data "static:static" --add-data "src:src"
 
     steps:
     - name: Checkout code
@@ -47,26 +47,73 @@ jobs:
         cache: 'pip'
 
     - name: Install dependencies
+      shell: bash
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pyinstaller pywebview
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
 
-    - name: Build with PyInstaller
+    - name: Build with PyInstaller (Windows)
+      if: runner.os == 'Windows'
+      shell: cmd
       run: |
         pyinstaller ${{ matrix.pyinstaller_args }} main.py
+
+    - name: Build with PyInstaller (macOS/Linux)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        pyinstaller ${{ matrix.pyinstaller_args }} main.py
+
+    - name: Prepare artifact (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        if [ -d "dist/main.app" ]; then
+          mv "dist/main.app" "dist/${{ matrix.asset_name }}.app"
+          echo "Created ${{ matrix.asset_name }}.app"
+        elif [ -f "dist/main" ]; then
+          mv "dist/main" "dist/${{ matrix.asset_name }}"
+          echo "Created ${{ matrix.asset_name }}"
+        else
+          echo "Warning: No output found in dist/"
+          ls -la dist/
+        fi
+
+    - name: Prepare artifact (Windows/Linux non-app)
+      if: runner.os != 'macOS'
+      shell: bash
+      run: |
+        if [ -f "dist/${{ matrix.output_name }}" ]; then
+          echo "Artifact already exists: ${{ matrix.output_name }}"
+        elif [ -f "dist/main" ]; then
+          mv "dist/main" "dist/${{ matrix.output_name }}"
+          echo "Renamed main to ${{ matrix.output_name }}"
+        elif [ -f "dist/main.exe" ]; then
+          mv "dist/main.exe" "dist/${{ matrix.output_name }}"
+          echo "Renamed main.exe to ${{ matrix.output_name }}"
+        else
+          echo "Warning: No output found in dist/"
+          ls -la dist/
+        fi
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.asset_name }}
-        path: dist/${{ matrix.output_name }}
+        path: |
+          dist/${{ matrix.asset_name }}
+          dist/${{ matrix.asset_name }}.app/
 
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: dist/${{ matrix.output_name }}
+        files: |
+          dist/${{ matrix.asset_name }}
+          dist/${{ matrix.asset_name }}.app/
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
