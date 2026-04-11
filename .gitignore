@@ -1,0 +1,65 @@
+# Виртуальное окружение
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Файлы сборки PyInstaller
+*.spec
+dist/
+build/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Пользовательские данные (сохранённые персонажи и т.п.) — если не хотите их в репозитории
+custom/
+
+# Логи и отладочные файлы
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Файлы кэша pytest, coverage, mypy
+.pytest_cache/
+.coverage
+.coverage.*
+*.cover
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Файлы документации и временные файлы редакторов
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE и редакторы
+.vscode/
+.idea/
+*.sublime-*
+.project
+.pydevproject
+.settings/
+
+# Файлы окружения и конфиденциальные данные
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# Результаты сборки на разных платформах (если вы собираете локально)
+*.exe
+*.app
+*.msi
+*.dmg
+
+# Журналы pywebview
+webview.log
