@@ -24,17 +24,17 @@ jobs:
           - os: windows-latest
             output_name: wod_character_sheet.exe
             asset_name: wod_character_sheet-windows.exe
-            pyinstaller_args: --onefile --windowed --icon=static/img/favicon.ico --add-data "static;static" --add-data "src;src"
+            pyinstaller_args: --onefile --windowed --icon=static/img/favicon.ico --add-data "static;static" --add-data "src;src" --name wod_character_sheet
           
           - os: macos-latest
-            output_name: wod_character_sheet
-            asset_name: wod_character_sheet-macos
-            pyinstaller_args: --windowed --onedir --icon=static/img/favicon.icns --add-data "static:static" --add-data "src:src"
+            output_name: wod_character_sheet.app
+            asset_name: wod_character_sheet-macos.zip
+            pyinstaller_args: --windowed --onedir --icon=static/img/favicon.icns --add-data "static:static" --add-data "src:src" --name wod_character_sheet
           
           - os: ubuntu-latest
             output_name: wod_character_sheet
             asset_name: wod_character_sheet-linux
-            pyinstaller_args: --onefile --windowed --add-data "static:static" --add-data "src:src"
+            pyinstaller_args: --onefile --windowed --add-data "static:static" --add-data "src:src" --name wod_character_sheet
 
     steps:
     - name: Checkout code
@@ -55,65 +55,99 @@ jobs:
           pip install -r requirements.txt
         fi
 
-    - name: Build with PyInstaller (Windows)
-      if: runner.os == 'Windows'
-      shell: cmd
-      run: |
-        pyinstaller ${{ matrix.pyinstaller_args }} main.py
-
-    - name: Build with PyInstaller (macOS/Linux)
-      if: runner.os != 'Windows'
+    - name: Build with PyInstaller
       shell: bash
       run: |
         pyinstaller ${{ matrix.pyinstaller_args }} main.py
+        echo "=== Contents of dist/ ==="
+        ls -la dist/
 
-    - name: Prepare artifact (macOS)
+    - name: Prepare artifact (macOS - create zip)
       if: runner.os == 'macOS'
       shell: bash
       run: |
-        if [ -d "dist/main.app" ]; then
-          mv "dist/main.app" "dist/${{ matrix.asset_name }}.app"
-          echo "Created ${{ matrix.asset_name }}.app"
-        elif [ -f "dist/main" ]; then
-          mv "dist/main" "dist/${{ matrix.asset_name }}"
-          echo "Created ${{ matrix.asset_name }}"
+        cd dist
+        if [ -d "wod_character_sheet.app" ]; then
+          zip -r wod_character_sheet-macos.zip wod_character_sheet.app
+          echo "Created wod_character_sheet-macos.zip"
         else
-          echo "Warning: No output found in dist/"
-          ls -la dist/
+          echo "ERROR: wod_character_sheet.app not found!"
+          ls -la
+          exit 1
         fi
 
-    - name: Prepare artifact (Windows/Linux non-app)
-      if: runner.os != 'macOS'
+    - name: Prepare artifact (Windows)
+      if: runner.os == 'Windows'
       shell: bash
       run: |
-        if [ -f "dist/${{ matrix.output_name }}" ]; then
-          echo "Artifact already exists: ${{ matrix.output_name }}"
-        elif [ -f "dist/main" ]; then
-          mv "dist/main" "dist/${{ matrix.output_name }}"
-          echo "Renamed main to ${{ matrix.output_name }}"
-        elif [ -f "dist/main.exe" ]; then
-          mv "dist/main.exe" "dist/${{ matrix.output_name }}"
-          echo "Renamed main.exe to ${{ matrix.output_name }}"
+        cd dist
+        if [ -f "wod_character_sheet.exe" ]; then
+          cp wod_character_sheet.exe wod_character_sheet-windows.exe
+          echo "Created wod_character_sheet-windows.exe"
         else
-          echo "Warning: No output found in dist/"
-          ls -la dist/
+          echo "ERROR: wod_character_sheet.exe not found!"
+          ls -la
+          exit 1
         fi
+
+    - name: Prepare artifact (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        cd dist
+        if [ -f "wod_character_sheet" ]; then
+          cp wod_character_sheet wod_character_sheet-linux
+          chmod +x wod_character_sheet-linux
+          echo "Created wod_character_sheet-linux"
+        else
+          echo "ERROR: wod_character_sheet not found!"
+          ls -la
+          exit 1
+        fi
+
+    - name: List final artifacts
+      shell: bash
+      run: |
+        echo "=== Final contents of dist/ ==="
+        ls -la dist/
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.asset_name }}
-        path: |
-          dist/${{ matrix.asset_name }}
-          dist/${{ matrix.asset_name }}.app/
+        path: dist/${{ matrix.asset_name }}
+        if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: List downloaded artifacts
+      run: |
+        echo "=== Downloaded artifacts ==="
+        find artifacts -type f -ls
+
+    - name: Prepare release files
+      run: |
+        mkdir -p release
+        # Копируем все файлы из артефактов в папку release
+        find artifacts -type f -exec cp {} release/ \;
+        echo "=== Files for release ==="
+        ls -la release/
 
     - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          dist/${{ matrix.asset_name }}
-          dist/${{ matrix.asset_name }}.app/
+        files: release/*
         generate_release_notes: true
+        draft: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
