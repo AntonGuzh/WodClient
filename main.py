@@ -19,8 +19,5 @@ if __name__ == "__main__":
     )
     api.set_window(window)
 
-    def on_loaded():
-        api.update_display()
-
-    window.events.loaded += on_loaded
     webview.start(debug=False)
+    

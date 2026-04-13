@@ -855,27 +855,27 @@
             if (!container) return;
             const boxes = container.querySelectorAll('.box');
             const total = boxes.length; // всегда 10
-            const filled = total - maxVal; // количество недоступных (закрашенных)
 
             boxes.forEach((box, index) => {
                 // Сбрасываем классы состояния
                 box.classList.remove('filled', 'hard', 'light');
 
-                if (index < filled) {
-                    box.classList.add('filled');
-                } else if (index < filled + hard) {
+                if (index < hard) {
                     box.classList.add('hard');
                     box.classList.remove('not-clickable');
                     box.onclick = function() {
                         healDamage(trackerId, true);  // true = тяжёлое
                     };
-                } else if (index < filled + hard + light) {
+                } else if (index < hard + light) {
                     box.classList.add('light');
                     box.classList.remove('not-clickable');
                     box.onclick = function() {
                         healDamage(trackerId, false);  // false = лёгкое
                     };
+                } else if (index < maxVal) {
+                    box.classList.add('not-clickable');
                 } else {
+                    box.classList.add('filled');
                     box.classList.add('not-clickable');
                 }
                 // иначе остаётся пустым
@@ -1324,6 +1324,9 @@
 
             // Настраиваем автосохранение
             setupAutoSave();
+
+            // Отображаем всё
+            pywebview.api.update_display()
         });
     </script>
 </body>

@@ -12,13 +12,13 @@ class CharactersController:
     def __init__(self):
         self.character_list = self.load_character_list()
         self.current_character: character.VampireCharacter = None
-        self.path = None
+        self._path = None
 
     def save_character(self) -> None:
-        if self.path is None:
+        if self._path is None:
             return
 
-        with open(self.path, 'w+', encoding='utf-8') as f:
+        with open(self._path, 'w+', encoding='utf-8') as f:
             json.dump(self.current_character.to_dict(), f)
 
     def load_character_list(self) -> List[dict]:
@@ -32,7 +32,7 @@ class CharactersController:
                     'name': f_dict.get('name', None),
                     'sire': f_dict.get('sire', None),
                     'generation': f_dict.get('generation', None),
-                    'file_path': str(file.absolute())
+                    'file_path': str(file.absolute().resolve())
                 })
 
         return result
@@ -40,16 +40,16 @@ class CharactersController:
     def load_character(self, file_path: str):
         with open(file_path, 'r', encoding='utf-8') as f:
             self.current_character = character.VampireCharacter.from_dict(json.load(f))
-            self.path = Path(file_path)
+            self._path = Path(file_path)
 
     def create_character(self):
         self.current_character = character.VampireCharacter()
-        self.path = Path(user_data_path('characters')).joinpath(f'{uuid.uuid4()}.json')
+        self._path = Path(user_data_path('characters')).joinpath(f'{uuid.uuid4()}.json')
         self.character_list.append({
             'name': self.current_character.name,
             'sire': self.current_character.sire,
             'generation': self.current_character.generation,
-            'file_path': str(self.path.absolute())
+            'file_path': str(self._path.absolute().resolve())
             
         })
         
