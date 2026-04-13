@@ -66,7 +66,7 @@ class Api:
     def update_text_field(self, field_id, value):
         char = self.character_controller.get_current_character()
         """Вызывается из JavaScript при изменении текстового поля"""
-        annotations = getattr(char, '__annotations__', {})
+        annotations = getattr(type(char), '__annotations__', {})
         target_type = annotations.get(field_id)
 
         if hasattr(char, field_id):
