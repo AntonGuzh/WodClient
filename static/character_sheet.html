@@ -795,6 +795,10 @@
                 const element = document.getElementById(fieldId);
                 if (element) {
                     element.value = value;
+                    if (element.tagName === 'TEXTAREA') {
+                        element.style.height = 'auto';
+                        element.style.height = `${element.scrollHeight}px`;
+                    }
                 }
             }
         }
@@ -1281,6 +1285,13 @@
                 pywebview.api.add_advantage(newName).then(() => refreshAdvantages());
             });
         }
+
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = `${this.scrollHeight}px`;
+            });
+        });
 
         // Загружаем сохранённые значения из Python при старте
         window.addEventListener('pywebviewready', function() {
