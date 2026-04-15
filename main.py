@@ -1,6 +1,5 @@
 import webview
 import os
-import sys
 
 from src.views.io import Api
 from src.utils import resource_path
@@ -20,4 +19,3 @@ if __name__ == "__main__":
     api.set_window(window)
 
     webview.start(debug=False)
-    
