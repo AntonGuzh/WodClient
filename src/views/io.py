@@ -118,12 +118,20 @@ class Api:
     
     def get_all_disciplines(self):
         """Возвращает список всех доступных дисциплин для отображения в модальном окне"""
+        clan_disciplines = []
+        clan_name = self.character_controller.get_current_character().clan
+        for clan in self.clans_controller.get_clans():
+            if clan.name == clan_name:
+                clan_disciplines = set(clan.disciplines)
+                break
+            
         result = []
         for discipline in self.disciplines_controller.get_disciplines_list():
             if discipline.name in self.character_controller.get_current_character().disciplines:
                 continue
 
             disc_dict = discipline.to_dict()
+            disc_dict['is_clan'] = discipline.name in clan_disciplines
             result.append(disc_dict)
         return result
     
@@ -215,14 +223,6 @@ class Api:
             if clan.name == clan_name:
                 return clan.bane_short_description
         return ""
-    
-    def get_clan_disciplines(self):
-        """Возвращает список дисциплин клана текущего персонажа"""
-        clan_name = self.character_controller.get_current_character().clan
-        for clan in self.clans_controller.get_clans():
-            if clan.name == clan_name:
-                return clan.disciplines
-        return []
     
     def set_character_clan(self, clan_name: str) -> bool:
         """Устанавливает клан персонажа"""

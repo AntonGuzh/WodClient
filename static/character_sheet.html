@@ -7,9 +7,8 @@
     <link rel="stylesheet" href="css/style.css">
 
     <script src="js/api.js"></script>
-    <!-- <script defer src="js/stores/character.js"></script> -->
     <script src="js/components/mutable_tracker.js"></script>
-    <!-- <script defer src="js/app.js"></script> -->
+    <script src="js/components/modal_manager.js"></script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -18,136 +17,209 @@
     <div class="action-buttons">
         <button class="action-btn" onclick="renderCharacterList()">Мои персонажи</button>
         <span></span>
-        <button class="action-btn" onclick="showDiceModal()">🎲 Бросить кости</button>
-        <button class="action-btn" onclick="showDamageModal()">💔 Нанести урон</button>
-        <button class="action-btn" onclick="showStressModal()">😰 Получить стресс</button>
+        <button class="action-btn" onclick="modalManager.open('diceModal')">🎲 Бросить кости</button>
+        <button class="action-btn" onclick="modalManager.open('damageModal')">💔 Нанести урон</button>
+        <button class="action-btn" onclick="modalManager.open('stressModal')">😰 Получить стресс</button>
     </div>
 
-    <!-- Модальное окно для урона -->
-    <div id="damageModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close-btn" onclick="closeDamageModal()">&times;</span>
+    <div id="globalModal" class="modal" x-data="modalManager()">
+        <div class="modal-content" :class="currentModal?.params.wide ? 'modal-wide' : ''">
+            <div class="modal-header" :class="stack.length > 1 ? 'with-nav' : ''">
+                <span class="nav-btn back-btn" x-show="stack.length > 1" @click="back()">←</span>
+                <span class="close-btn" @click="close()">&times;</span>
             </div>
-            <h3>Нанесение урона</h3>
-            <input type="number" id="damageAmount" min="1" placeholder="Количество урона">
-            <div class="toggle-group">
-                <label>
-                    <input type="checkbox" id="isHeavyDamage"> 
-                    Тяжёлый урон (X)
-                </label>
-                <label>
-                    <input type="checkbox" id="halveDamage" checked> 
-                    Ополовинить урон (с учётом брони/сопротивления)
-                </label>
-            </div>
-            <button class="modal-submit" onclick="applyDamage()">Применить урон</button>
-        </div>
-    </div>
 
-    <!-- Модальное окно для стресса -->
-    <div id="stressModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close-btn" onclick="closeStressModal()">&times;</span>
-            </div>
-            <h3>Получение стресса</h3>
-            <input type="number" id="stressAmount" min="1" placeholder="Количество стресса">
-            <div class="toggle-group">
-                <label>
-                    <input type="checkbox" id="isHeavyStress"> 
-                    Тяжёлый стресс (X)
-                </label>
-                <label>
-                    <input type="checkbox" id="halveStress" checked> 
-                    Ополовинить стресс (с учётом брони/сопротивления)
-                </label>
-            </div>
-            <button class="modal-submit" onclick="applyStress()">Применить стресс</button>
-        </div>
-    </div>
-
-    <!-- Модальное окно для броска костей -->
-    <div id="diceModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close-btn" onclick="closeDiceModal()">&times;</span>
-            </div>
-            <h3>Бросок костей</h3>
-            
-            <!-- Секция ввода -->
-            <div id="diceInputSection">
-                <input type="number" id="diceCount" min="1" value="1" placeholder="Количество кубиков">
-                <div class="toggle-group">
-                    <label>
-                        <input type="checkbox" id="hungry" checked> 
-                        Учитывать голод
-                    </label>
+            <!-- Все возможные окна -->
+            <template x-if="currentModal?.id === 'damageModal'">
+                <div>
+                    <h3>Нанесение урона</h3>
+                    <input type="number" id="damageAmount" min="1" placeholder="Количество урона">
+                    <div class="toggle-group">
+                        <label>
+                            <input type="checkbox" id="isHeavyDamage"> 
+                            Тяжёлый урон (X)
+                        </label>
+                        <label>
+                            <input type="checkbox" id="halveDamage" checked> 
+                            Ополовинить урон (с учётом брони/сопротивления)
+                        </label>
+                    </div>
+                    <button class="modal-submit" onclick="applyDamage()">Применить урон</button>
                 </div>
-                <button class="modal-submit" onclick="rollDice()">Бросить</button>
-            </div>
-            
-            <!-- Секция результатов (изначально скрыта) -->
-            <div id="diceResultSection" style="display: none;">
-                <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
-                    Успехов: <span id="successCount">0</span>
+            </template>
+
+            <template x-if="currentModal?.id === 'stressModal'">
+                <div>
+                    <h3>Получение стресса</h3>
+                    <input type="number" id="stressAmount" min="1" placeholder="Количество стресса">
+                    <div class="toggle-group">
+                        <label>
+                            <input type="checkbox" id="isHeavyStress"> 
+                            Тяжёлый стресс (X)
+                        </label>
+                        <label>
+                            <input type="checkbox" id="halveStress" checked> 
+                            Ополовинить стресс (с учётом брони/сопротивления)
+                        </label>
+                    </div>
+                    <button class="modal-submit" onclick="applyStress()">Применить стресс</button>
                 </div>
-                
-                <!-- Контейнер для кубиков (картинки) -->
-                <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;">
-                    <!-- сюда будут добавляться img -->
+            </template>
+
+            <template x-if="currentModal?.id === 'diceModal'">
+                <div>
+                    <h3>Бросок костей</h3>
+
+                    <!-- Секция ввода -->
+                    <div id="diceInputSection">
+                        <input type="number" id="diceCount" min="1" value="1" placeholder="Количество кубиков">
+                        <div class="toggle-group">
+                            <label>
+                                <input type="checkbox" id="hungry" checked> 
+                                Учитывать голод
+                            </label>
+                        </div>
+                        <button class="modal-submit" onclick="rollDice()">Бросить</button>
+                    </div>
+
+                    <!-- Секция результатов (изначально скрыта) -->
+                    <div id="diceResultSection" style="display: none;">
+                        <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
+                            Успехов: <span id="successCount">0</span>
+                        </div>
+
+                        <!-- Контейнер для кубиков (картинки) -->
+                        <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;">
+                            <!-- сюда будут добавляться img -->
+                        </div>
+
+                        <!-- Особые результаты -->
+                        <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
+
+                        <!-- Кнопка нового броска -->
+                        <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
+                    </div>
                 </div>
-                
-                <!-- Особые результаты -->
-                <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
-                
-                <!-- Кнопка нового броска -->
-                <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
-            </div>
-        </div>
-    </div>
+            </template>
 
-    <!-- Модальное окно просмотра дисциплины -->
-    <div id="disciplineDetailsModal" class="modal">
-        <div class="modal-content modal-wide">
-            <div class="modal-header with-nav">
-                <span class="nav-btn back-btn" id="disciplineBackBtn" onclick="backToDisciplinesList()">←</span>
-                <span class="close-btn" onclick="closeDisciplineDetailsModal()">&times;</span>
-            </div>
-            <div id="disciplineDetails" class="modal-body"></div>
-        </div>
-    </div>
+            <template x-if="currentModal?.id === 'disciplineDetailsModal'">
+                <div x-data="{ data: null }" x-init="data = await getDisciplineDetails(currentModal?.params.diciplineName)" class="modal-body">
+                    <div class="details-content">
+                        <img :src="data?.icon">
+                        <h2 x-text="data?.name"></h2>
+                        <p><strong>Источник:</strong> <span x-text="data?.source"></span></p>
+                        <p><strong>Кратко:</strong> <span x-text="data?.short_description"></span></p>
+                        <div><strong>Общее правило:</strong> <span x-html="data?.general_rule"></span></div>
+                        <div><strong>Описание:</strong> <span x-html="data?.description"></span></div>
+                        <p><strong>Тип:</strong> <span x-text="data?.type"></span></p>
+                        <p><strong>Резонанс:</strong> <span x-text="data?.resonance"></span></p>
+                    </div>
+                </div>
+            </template>
 
-    <!-- Модальное окно просмотра способности -->
-    <div id="powerDetailsModal" class="modal">
-        <div class="modal-content modal-wide">
-            <div class="modal-header with-nav">
-                <span class="nav-btn back-btn" id="powerBackBtn" onclick="backToPowersList()">←</span>
-                <span class="close-btn" onclick="closePowerDetailsModal()">&times;</span>
-            </div>
-            <div id="powerDetails" class="modal-body"></div>
-        </div>
-    </div>
+            <template x-if="currentModal?.id === 'disciplineDetailsForAddModal'">
+                <div x-data="{ data: null }" x-init="data = await getDisciplineDetails(currentModal?.params.diciplineName)" class="modal-body">
+                    <div class="details-content">
+                        <img :src="data?.icon">
+                        <h2 x-text="data?.name"></h2>
+                        <p><strong>Кратко:</strong> <span x-text="data?.short_description"></span></p>
+                        <br>
+                        <button class="add-button" @click="addDiscipline(data?.name)">Добавить дисциплину</button>
+                        <p><strong>Источник:</strong> <span x-text="data?.source"></span></p>
+                        <div><strong>Общее правило:</strong> <span x-html="data?.general_rule"></span></div>
+                        <div><strong>Описание:</strong> <span x-html="data?.description"></span></div>
+                        <p><strong>Тип:</strong> <span x-text="data?.type"></span></p>
+                        <p><strong>Резонанс:</strong> <span x-text="data?.resonance"></span></p>
+                    </div>
+                </div>
+            </template>
 
-    <!-- Модальное окно выбора дисциплины (только крестик) -->
-    <div id="addDisciplineModal" class="modal">
-        <div class="modal-content modal-wide">
-            <div class="modal-header">
-                <span class="close-btn" onclick="closeAddDisciplineModal()">&times;</span>
-            </div>
-            <h3>Выберите дисциплину</h3>
-            <div id="disciplinesList" class="disciplines-list modal-body"></div>
-        </div>
-    </div>
+            <template x-if="currentModal?.id === 'powerDetailsModal'">
+                <div x-data="{ data: null }" x-init="data = await getPowerDetails(currentModal?.params.powerName)" class="modal-body">
+                    <div class="details-content">
+                        <h2 x-text="data?.name"></h2>
+                        <p><strong>Источник:</strong> <span x-text="data?.source"></span></p>
+                        <p><strong>Уровень:</strong> <span x-text="data?.level"></span></p>
+                        <p><strong>Кратко:</strong> <span x-text="data?.short_description"></span></p>
+                        <div><strong>Описание:</strong> <span x-html="data?.description"></span></div>
+                        <template x-if="data?.check_pool">
+                            <p><strong>Пул проверки:</strong> <span x-text="data?.check_pool"></span></p>
+                        </template>
+                        <template x-if="data?.reckoning">
+                            <div><strong>Расплата:</strong> <span x-html="data?.reckoning"></span></div>
+                        </template>
+                        <template x-if="data?.rule">
+                            <div><strong>Правило:</strong> <span x-html="data?.rule"></span></div>
+                        </template>
+                        <template x-if="data?.duration">
+                            <p><strong>Длительность:</strong> <span x-text="data?.duration"></span></p>
+                        </template>
+                        <template x-if="data?.amalgam">
+                            <p><strong>Амальгама:</strong> <span x-text="data?.amalgam.dicipline_name"></span> <span x-text="data?.amalgam.level"></span></p>
+                        </template>
+                    </div>
+                </div>
+            </template>
 
-    <!-- Модальное окно выбора способности -->
-    <div id="addPowerModal" class="modal">
-        <div class="modal-content modal-wide">
-            <div class="modal-header">
-                <span class="close-btn" onclick="closeAddPowerModal()">&times;</span>
-            </div>
-            <h3>Выберите способность</h3>
-            <div id="powersList" class="powers-list modal-body"></div>
+            <template x-if="currentModal?.id === 'powerDetailsForAddModal'">
+                <div x-data="{ data: null }" x-init="data = await getPowerDetails(currentModal?.params.powerName)" class="modal-body">
+                    <div class="details-content">
+                        <h2 x-text="data?.name"></h2>
+                        <button class="add-button" @click="addPower(data?.discipline_name, data?.name)">Добавить способность</button>
+                        <p><strong>Источник:</strong> <span x-text="data?.source"></span></p>
+                        <p><strong>Уровень:</strong> <span x-text="data?.level"></span></p>
+                        <p><strong>Кратко:</strong> <span x-text="data?.short_description"></span></p>
+                        <p><strong>Описание:</strong> <span x-text="data?.description"></span></p>
+                        <template x-if="data?.check_pool">
+                            <p><strong>Пул проверки:</strong> <span x-text="data?.check_pool"></span></p>
+                        </template>
+                        <template x-if="data?.reckoning">
+                            <div><strong>Расплата:</strong> <span x-html="data?.reckoning"></span></div>
+                        </template>
+                        <template x-if="data?.rule">
+                            <div><strong>Правило:</strong> <span x-html="data?.rule"></span></div>
+                        </template>
+                        <template x-if="data?.duration">
+                            <p><strong>Длительность:</strong> <span x-text="data?.duration"></span></p>
+                        </template>
+                        <template x-if="data?.amalgam">
+                            <p><strong>Амальгама:</strong> <span x-text="data?.amalgam.dicipline_name"></span> <span x-text="data?.amalgam.level"></span></p>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="currentModal?.id === 'addDisciplineModal'">
+                <div x-data="{ disciplines: null }" x-init="disciplines = await getAllDisciplines()">
+                    <h3>Выберите дисциплину</h3>
+                    <div id="disciplinesList" class="disciplines-list modal-body">
+                        <template x-for="disc in disciplines">
+                            <div class="discipline-list-item" :class="disc.is_clan ? 'clan-discipline' : ''" @click="open('disciplineDetailsForAddModal', {wide: true, diciplineName: disc.name})">
+                                <img :src="disc.icon" class="icon">
+                                <strong x-text="disc.name"></strong>
+                                <span class="short-desc" x-text="disc.short_description"></span>
+                                <template x-if="disc.is_clan">
+                                    <span class="clan-badge">Клановая</span>
+                                </template>
+                            </div>
+                        </template>
+                </div>
+            </template>
+
+            <template x-if="currentModal?.id === 'addPowerModal'">
+                <div x-data="{ powers: null }" x-init="powers = await getDisciplinePowers(currentModal?.params.disciplineName, currentModal?.params.currentLevel)">
+                    <h3>Выберите способность</h3>
+                    <div id="powersList" class="powers-list modal-body">
+                        <template x-for="power in powers">
+                            <div class="power-list-item" @click="open('powerDetailsForAddModal', {wide: true, powerName: power.name, disciplineName: power.discipline_name})">
+                                <strong x-text="power.name"></strong>
+                                <span class="short-desc" x-text="power.short_description"></span>
+                                <span class="level-required">Ур. <span x-text="power.level"></span></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
         </div>
     </div>
 
@@ -213,15 +285,15 @@
                             <h3>Физические</h3>
                             <div class="attribute">
                                 <span>Сила</span>
-                                <div x-data="mutable_tracker('strength', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('strength', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Ловкость</span>
-                                <div x-data="mutable_tracker('dexterity', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('dexterity', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Выносливость</span>
-                                <div x-data="mutable_tracker('stamina', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('stamina', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
 
@@ -229,15 +301,15 @@
                             <h3>Социальные</h3>
                             <div class="attribute">
                                 <span>Обаяние</span>
-                                <div x-data="mutable_tracker('charisma', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('charisma', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Манипуляция</span>
-                                <div x-data="mutable_tracker('manipulation', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('manipulation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Самообладание</span>
-                                <div x-data="mutable_tracker('composure', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('composure', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
 
@@ -245,15 +317,15 @@
                             <h3>Ментальные</h3>
                             <div class="attribute">
                                 <span>Интеллект</span>
-                                <div x-data="mutable_tracker('intelligence', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('intelligence', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Смекалка</span>
-                                <div x-data="mutable_tracker('wits', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('wits', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Упорство</span>
-                                <div x-data="mutable_tracker('resolve', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('resolve', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
                     </div>
@@ -284,116 +356,116 @@
                         <div class="skills-column">
                             <div class="skill">
                                 <span>Атлетика</span>
-                                <div x-data="mutable_tracker('athletics', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('athletics', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Вождение</span>
-                                <div x-data="mutable_tracker('drive', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('drive', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Воровство</span>
-                                <div x-data="mutable_tracker('larceny', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('larceny', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Выживание</span>
-                                <div x-data="mutable_tracker('survival', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('survival', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Драка</span>
-                                <div x-data="mutable_tracker('brawl', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('brawl', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Ремесло</span>
-                                <div x-data="mutable_tracker('craft', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('craft', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Скрытность</span>
-                                <div x-data="mutable_tracker('stealth', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('stealth', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Стрельба</span>
-                                <div x-data="mutable_tracker('firearms', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('firearms', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Фехтование</span>
-                                <div x-data="mutable_tracker('melee', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('melee', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
                         <div class="skills-column">
                             <div class="skill">
                                 <span>Запугивание</span>
-                                <div x-data="mutable_tracker('intimidation', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('intimidation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Исполнение</span>
-                                <div x-data="mutable_tracker('performance', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('performance', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Лидерство</span>
-                                <div x-data="mutable_tracker('leadership', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('leadership', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Обращение с животными</span>
-                                <div x-data="mutable_tracker('animal_ken', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('animal_ken', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Проницательность</span>
-                                <div x-data="mutable_tracker('insight', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('insight', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Убеждение</span>
-                                <div x-data="mutable_tracker('persuasion', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('persuasion', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Уличное чутьё</span>
-                                <div x-data="mutable_tracker('streetwise', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('streetwise', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Хитрость</span>
-                                <div x-data="mutable_tracker('subterfuge', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('subterfuge', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Этикет</span>
-                                <div x-data="mutable_tracker('etiquette', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('etiquette', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
                         <div class="skills-column">
                             <div class="skill">
                                 <span>Гуманитарные науки</span>
-                                <div x-data="mutable_tracker('humanities', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('humanities', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Естественные науки</span>
-                                <div x-data="mutable_tracker('science', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('science', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Медицина</span>
-                                <div x-data="mutable_tracker('medicine', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('medicine', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Наблюдательность</span>
-                                <div x-data="mutable_tracker('awareness', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('awareness', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Оккультизм</span>
                                 <div class="" id="occult" data-total="5" data-value="0" data-type="dot"></div>
-                                <div x-data="mutable_tracker('occult', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('occult', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Политика</span>
-                                <div x-data="mutable_tracker('politics', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('politics', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Расследование</span>
-                                <div x-data="mutable_tracker('investigation', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('investigation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Техника</span>
-                                <div x-data="mutable_tracker('technology', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('technology', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Финансы</span>
-                                <div x-data="mutable_tracker('finance', 5, 'dots', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                                <div x-data="mutable_tracker('finance', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
                     </div>
@@ -404,7 +476,7 @@
                     <h2>ДИСЦИПЛИНЫ</h2>
                     <div class="disciplines-container" id="disciplines_container">
                         <!-- Кнопка добавления новой дисциплины -->
-                        <div class="add-discipline-btn" onclick="showAddDisciplineModal()">
+                        <div class="add-discipline-btn" onclick="window.modalManager.open('addDisciplineModal', {wide: true})">
                             <span>+ Добавить дисциплину</span>
                         </div>
                         <!-- Сюда будут рендериться дисциплины персонажа -->
@@ -429,18 +501,18 @@
                     </div>
                     <div class="tracker-small">
                         <h3>Голод</h3>
-                        <div x-data="mutable_tracker('hunger', 5, 'boxes bloody', 'box', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                        <div x-data="mutable_tracker('hunger', 5, 'boxes bloody', 'box', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                     </div>
                     <div class="tracker-small">
                         <h3>Человечность</h3>
-                        <div x-data="mutable_tracker('humanity', 10, 'boxes', 'box', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                        <div x-data="mutable_tracker('humanity', 10, 'boxes', 'box', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                     </div>
                 </div>
 
                 <!-- Сила Крови -->
                 <div class="blood-potency">
                     <h3>Сила Крови</h3>
-                    <div x-data="mutable_tracker('blood_potency', 10, 'dots bloody', 'dot', 'getBasicTrackerValue', 'setBasicTrackerValue')" x-html="render()"></div>
+                    <div x-data="mutable_tracker('blood_potency', 10, 'dots bloody', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                     <div class="blood-info">
                         <div class="info-item">
                             <label>Модификатор прилива Крови</label>
@@ -551,31 +623,6 @@
     </div>
 
     <script>
-        // Функции для модальных окон
-        function showDamageModal() {
-            document.getElementById('damageModal').style.display = 'block';
-        }
-        
-        function closeDamageModal() {
-            document.getElementById('damageModal').style.display = 'none';
-        }
-        
-        function showDiceModal() {
-            document.getElementById('diceModal').style.display = 'block';
-        }
-        
-        function closeDiceModal() {
-            document.getElementById('diceModal').style.display = 'none';
-        }
-
-        function showStressModal() {
-            document.getElementById('stressModal').style.display = 'block';
-        }
-
-        function closeStressModal() {
-            document.getElementById('stressModal').style.display = 'none';
-        }
-        
         function applyDamage() {
             const amount = parseInt(document.getElementById('damageAmount').value);
             const isHeavy = document.getElementById('isHeavyDamage').checked;
@@ -589,7 +636,7 @@
             // Вызываем Python функцию
             pywebview.api.apply_damage(amount, isHeavy, halve).then(result => {
                 console.log('Урон применён:', result);
-                closeDamageModal();
+                window.modalManager.close();
             });
         }
 
@@ -605,7 +652,7 @@
             
             pywebview.api.apply_stress(amount, isHeavy, halve).then(result => {
                 console.log('Стресс применён:', result);
-                closeStressModal();
+                window.modalManager.close();
             });
         }
 
@@ -727,27 +774,6 @@
             document.getElementById('specialResults').innerHTML = '';
         }
 
-        function closeDiceModal() {
-            document.getElementById('diceModal').style.display = 'none';
-            resetDiceModal();
-        }
-
-        // Обработчик клика вне модального окна
-        window.onclick = function(event) {
-            const damageModal = document.getElementById('damageModal');
-            const stressModal = document.getElementById('stressModal');
-            const diceModal = document.getElementById('diceModal');
-            if (event.target == damageModal) {
-                damageModal.style.display = 'none';
-            }
-            if (event.target == stressModal) {
-                stressModal.style.display = 'none';
-            }
-            if (event.target == diceModal) {
-                closeDiceModal(); // используем close, чтобы сбросить состояние
-            }
-        }
-
         // Функция для обновления всех вводимых текстовых полей при загрузке
         function updateAllTextFields(fields) {
             for (const [fieldId, value] of Object.entries(fields)) {
@@ -857,7 +883,7 @@
                 // Заголовок дисциплины
                 const header = document.createElement('div');
                 header.className = 'discipline-header';
-                header.onclick = () => showDisciplineDetails(discName);
+                header.onclick = () => window.modalManager.open('disciplineDetailsModal', {wide: true, diciplineName: discName});
                 
                 header.innerHTML = `
                     <img src="${discData.info.icon || 'img/default.png'}" class="discipline-icon">
@@ -868,7 +894,7 @@
                         ).join('')}
                     </div>
                     <div class="discipline-actions">
-                        <button onclick="showAddPowerModal('${discName}', ${discData.level}); event.stopPropagation();">➕</button>
+                        <button onclick="window.modalManager.open('addPowerModal', {wide: true, disciplineName: '${discName}', currentLevel: ${discData.level}})">➕</button>
                         <button onclick="removeDiscipline('${discName}'); event.stopPropagation();">❌</button>
                     </div>
                 `;
@@ -883,7 +909,7 @@
                     discData.powers.forEach(powerName => {
                         const powerItem = document.createElement('div');
                         powerItem.className = 'power-item';
-                        powerItem.onclick = () => showPowerDetails(powerName);
+                        powerItem.onclick = () => window.modalManager.open('powerDetailsModal', {wide: true, powerName: powerName});
                         
                         powerItem.innerHTML = `
                             <span class="power-name">${powerName}</span>
@@ -900,73 +926,10 @@
             }
         }
 
-        // Загрузка списка дисциплин для добавления
-        function showAddDisciplineModal() {
-            pywebview.api.get_all_disciplines().then(disciplines => {
-                // Получаем список клановых дисциплин текущего персонажа
-                pywebview.api.get_clan_disciplines().then(clanDisciplines => {
-                    const listDiv = document.getElementById('disciplinesList');
-                    listDiv.innerHTML = '';
-                    
-                    disciplines.forEach(disc => {
-                        const item = document.createElement('div');
-                        item.className = 'discipline-list-item';
-                        if (clanDisciplines.includes(disc.name)) {
-                            item.classList.add('clan-discipline');
-                        }
-                        item.onclick = () => showDisciplineDetailsForAdd(disc.name);
-                        
-                        item.innerHTML = `
-                            <img src="${disc.icon || 'img/default.png'}" class="icon">
-                            <strong>${disc.name}</strong>
-                            <span class="short-desc">${disc.short_description || ''}</span>
-                            ${clanDisciplines.includes(disc.name) ? '<span class="clan-badge">Клановая</span>' : ''}
-                        `;
-                        
-                        listDiv.appendChild(item);
-                    });
-                    
-                    document.getElementById('addDisciplineModal').style.display = 'block';
-                });
-            });
-        }
-
-        // Сохраняем состояние для навигации
-        let lastDisciplineName = null;
-        let lastDisciplineLevel = null;
-
-        // Показ деталей дисциплины (из списка для добавления)
-        function showDisciplineDetailsForAdd(disciplineName) {
-            document.getElementById('disciplineBackBtn').parentElement.classList.add('with-nav');
-            document.getElementById('disciplineBackBtn').style.display = 'flex';
-            lastDisciplineName = disciplineName;  // запоминаем текущую дисциплину
-    
-            pywebview.api.get_discipline_details(disciplineName).then(details => {
-                const detailsDiv = document.getElementById('disciplineDetails');
-                detailsDiv.innerHTML = `
-                    <div class="details-content">
-                        <img src="${details.icon || 'img/default.png'}">
-                        <h2>${details.name}</h2>
-                        <p><strong>Кратко:</strong> ${details.short_description}</p>
-                        <br>
-                        <button class="add-button" onclick="addDiscipline('${details.name}')">Добавить дисциплину</button>
-                        <p><strong>Источник:</strong> ${details.source}</p>
-                        <div><strong>Общее правило:</strong> ${details.general_rule}</div>
-                        <div><strong>Описание:</strong> ${details.description}</div>
-                        <p><strong>Тип:</strong> ${details.type}</p>
-                        <p><strong>Резонанс:</strong> ${details.resonance}</p>
-                    </div>
-                `;
-                
-                closeAddDisciplineModal();
-                document.getElementById('disciplineDetailsModal').style.display = 'block';
-            });
-        }
-
         // Добавление дисциплины персонажу
         function addDiscipline(disciplineName) {
             pywebview.api.add_discipline_to_character(disciplineName).then(() => {
-                closeDisciplineDetailsModal();
+                window.modalManager.close();
             });
         }
 
@@ -975,147 +938,16 @@
             pywebview.api.remove_discipline_from_character(disciplineName);
         }
 
-        // Показ модального окна для добавления способности
-        function showAddPowerModal(disciplineName, currentLevel) {
-            lastDisciplineName = disciplineName;
-            lastDisciplineLevel = currentLevel;
-
-            pywebview.api.get_discipline_powers(disciplineName, currentLevel + 1).then(powers => {
-                const listDiv = document.getElementById('powersList');
-                listDiv.innerHTML = '';
-                
-                powers.forEach(power => {
-                    const item = document.createElement('div');
-                    item.className = 'power-list-item';
-                    item.onclick = () => showPowerDetailsForAdd(power.name, disciplineName);
-                    
-                    item.innerHTML = `
-                        <strong>${power.name}</strong>
-                        <span class="short-desc">${power.short_description || ''}</span>
-                        <span class="level-required">Ур. ${power.level}</span>
-                    `;
-                    
-                    listDiv.appendChild(item);
-                });
-                
-                document.getElementById('addPowerModal').style.display = 'block';
-            });
-        }
-
-        // Показ деталей способности для добавления
-        function showPowerDetailsForAdd(powerName, disciplineName) {
-            document.getElementById('powerBackBtn').parentElement.classList.add('with-nav');
-            document.getElementById('powerBackBtn').style.display = 'flex';
-            pywebview.api.get_power_details(powerName).then(details => {
-                const detailsDiv = document.getElementById('powerDetails');
-                detailsDiv.innerHTML = `
-                    <div class="details-content">
-                        <h2>${details.name}</h2>
-                        <button class="add-button" onclick="addPower('${disciplineName}', '${details.name}')">Добавить способность</button>
-                        <p><strong>Источник:</strong> ${details.source}</p>
-                        <p><strong>Уровень:</strong> ${details.level}</p>
-                        <p><strong>Кратко:</strong> ${details.short_description}</p>
-                        <p><strong>Описание:</strong> ${details.description}</p>
-                        ${details.check_pool ? `<p><strong>Пул проверки:</strong> ${details.check_pool}</p>` : ''}
-                        ${details.reckoning ? `<p><strong>Расчет:</strong> ${details.reckoning}</p>` : ''}
-                        ${details.rule ? `<p><strong>Правило:</strong> ${details.rule}</p>` : ''}
-                        ${details.duration ? `<p><strong>Длительность:</strong> ${details.duration}</p>` : ''}
-                        ${details.amalgam ? `<p><strong>Амальгама:</strong> ${details.amalgam.dicipline_name} ${details.amalgam.level}</p>` : ''}
-                    </div>
-                `;
-                
-                closeAddPowerModal();
-                document.getElementById('powerDetailsModal').style.display = 'block';
-            });
-        }
-
         // Добавление способности
         function addPower(disciplineName, powerName) {
             pywebview.api.add_power_to_character(disciplineName, powerName).then(() => {
-                closePowerDetailsModal();
+                window.modalManager.close();
             });
         }
 
         // Удаление способности
         function removePower(disciplineName, powerName) {
             pywebview.api.remove_power_from_character(disciplineName, powerName);
-        }
-
-        // Просмотр деталей дисциплины (из листа персонажа)
-        function showDisciplineDetails(disciplineName) {
-            document.getElementById('disciplineBackBtn').parentElement.classList.remove('with-nav');
-            document.getElementById('disciplineBackBtn').style.display = 'none';
-            pywebview.api.get_discipline_details(disciplineName).then(details => {
-                const detailsDiv = document.getElementById('disciplineDetails');
-                detailsDiv.innerHTML = `
-                    <div class="details-content">
-                        <img src="${details.icon || 'img/default.png'}">
-                        <h2>${details.name}</h2>
-                        <p><strong>Источник:</strong> ${details.source}</p>
-                        <p><strong>Кратко:</strong> ${details.short_description}</p>
-                        <div><strong>Общее правило:</strong> ${details.general_rule}</div>
-                        <div><strong>Описание:</strong> ${details.description}</div>
-                        <p><strong>Тип:</strong> ${details.type}</p>
-                        <p><strong>Резонанс:</strong> ${details.resonance}</p>
-                    </div>
-                `;
-                
-                document.getElementById('disciplineDetailsModal').style.display = 'block';
-            });
-        }
-
-        // Просмотр деталей способности (из листа персонажа)
-        function showPowerDetails(powerName) {
-            document.getElementById('powerBackBtn').parentElement.classList.remove('with-nav');
-            document.getElementById('powerBackBtn').style.display = 'none';
-            pywebview.api.get_power_details(powerName).then(details => {
-                const detailsDiv = document.getElementById('powerDetails');
-                detailsDiv.innerHTML = `
-                    <div class="details-content">
-                        <h2>${details.name}</h2>
-                        <p><strong>Источник:</strong> ${details.source}</p>
-                        <p><strong>Уровень:</strong> ${details.level}</p>
-                        <p><strong>Кратко:</strong> ${details.short_description}</p>
-                        <p><strong>Описание:</strong> ${details.description}</p>
-                        ${details.check_pool ? `<p><strong>Пул проверки:</strong> ${details.check_pool}</p>` : ''}
-                        ${details.reckoning ? `<p><strong>Расчет:</strong> ${details.reckoning}</p>` : ''}
-                        ${details.rule ? `<p><strong>Правило:</strong> ${details.rule}</p>` : ''}
-                        ${details.duration ? `<p><strong>Длительность:</strong> ${details.duration}</p>` : ''}
-                        ${details.amalgam ? `<p><strong>Амальгама:</strong> ${details.amalgam.dicipline_name} ${details.amalgam.level}</p>` : ''}
-                    </div>
-                `;
-                
-                document.getElementById('powerDetailsModal').style.display = 'block';
-            });
-        }
-
-        // Функции закрытия модальных окон
-        function closeAddDisciplineModal() {
-            document.getElementById('addDisciplineModal').style.display = 'none';
-        }
-
-        function closeDisciplineDetailsModal() {
-            document.getElementById('disciplineDetailsModal').style.display = 'none';
-        }
-
-        function closeAddPowerModal() {
-            document.getElementById('addPowerModal').style.display = 'none';
-        }
-
-        function closePowerDetailsModal() {
-            document.getElementById('powerDetailsModal').style.display = 'none';
-        }
-
-        // Возврат к списку способностей
-        function backToPowersList() {
-            closePowerDetailsModal();
-            showAddPowerModal(lastDisciplineName, lastDisciplineLevel);
-        }
-
-        // Возврат к списку дисциплин из окна выбора способностей
-        function backToDisciplinesList() {
-            closeDisciplineDetailsModal();
-            showAddDisciplineModal();
         }
 
         // Загружаем список кланов
@@ -1201,7 +1033,7 @@
 
             // Контейнер для трекера с Alpine-атрибутами
             const trackerContainer = document.createElement('div');
-            trackerContainer.setAttribute('x-data', `mutable_tracker('${name}', 5, 'dots', 'dot', 'getAdvantageValue', 'setAdvantageValue')`);
+            trackerContainer.setAttribute('x-data', `mutable_tracker('${name}', 5, 'dots', 'dot', getAdvantageValue, setAdvantageValue)`);
             trackerContainer.setAttribute('x-html', 'render()');
 
             // Кнопка удаления

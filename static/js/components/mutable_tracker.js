@@ -4,35 +4,20 @@ document.addEventListener('alpine:init', () => {
         total,
         containerType,
         itemType,
-        getterName,
-        setterName
+        getter,
+        setter
     ) => ({
         id, containerType, itemType, total,
         value: 0,
         async init() {
             this.$watch('value', () => {});
 
-            const getter = window[getterName];
-            if (getter) {
-                if (typeof getter === 'function') {
-                    this.value = await getter(this.id) || 0;
-                }
-            }
-
-            window.addEventListener('apiReady', async () => {
-                const getter = window[getterName];
-                if (typeof getter === 'function') {
-                    this.value = await getter(this.id) || 0;
-                }
-            });
+            this.value = await getter(this.id) || 0;
         },
-        setValue(index) {
+        async setValue(index) {
             this.value = (index + 1 === this.value) ? 0 : index + 1;
             
-            const setter = window[setterName];
-            if (typeof setter === 'function') {
-                setter(this.id, this.value);
-            }
+            await setter(this.id, this.value);
         },
         render() {
             let html = `<div class="${this.containerType}">`;
