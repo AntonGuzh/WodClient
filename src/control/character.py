@@ -1,3 +1,4 @@
+import threading
 from ..models import character
 from typing import List
 from pathlib import Path
@@ -13,13 +14,18 @@ class CharactersController:
         self.character_list = self.load_character_list()
         self.current_character: character.VampireCharacter = None
         self._path = None
+        self._lock = threading.Lock()  # добавлено
 
     def save_character(self) -> None:
-        if self._path is None:
-            return
+        with self._lock:
+            if self._path is None:
+                return
 
-        with open(self._path, 'w+', encoding='utf-8') as f:
-            json.dump(self.current_character.to_dict(), f)
+            data = self.current_character.to_dict()
+            path = self._path
+
+        with open(path, 'w+', encoding='utf-8') as f:
+            json.dump(data, f)
 
     def load_character_list(self) -> List[dict]:
         chr_dir = Path(user_data_path('characters'))
@@ -39,20 +45,29 @@ class CharactersController:
 
     def load_character(self, file_path: str):
         with open(file_path, 'r', encoding='utf-8') as f:
-            self.current_character = character.VampireCharacter.from_dict(json.load(f))
-            self._path = Path(file_path)
+            data = json.load(f)
+        new_character = character.VampireCharacter.from_dict(data)
+        new_path = Path(file_path)
+
+        with self._lock:
+            self.current_character = new_character
+            self._path = new_path
 
     def create_character(self):
-        self.current_character = character.VampireCharacter()
-        self._path = Path(user_data_path('characters')).joinpath(f'{uuid.uuid4()}.json')
-        self.character_list.append({
-            'name': self.current_character.name,
-            'sire': self.current_character.sire,
-            'generation': self.current_character.generation,
-            'file_path': str(self._path.absolute().resolve())
-            
-        })
-        
+        new_character = character.VampireCharacter()
+        new_path = Path(user_data_path('characters')).joinpath(f'{uuid.uuid4()}.json')
+
+        with self._lock:
+            self.current_character = new_character
+            self._path = new_path
+
+            self.character_list.append({
+                'name': new_character.name,
+                'sire': new_character.sire,
+                'generation': new_character.generation,
+                'file_path': str(new_path.absolute().resolve())
+            })
+
     def get_current_character(self):
         if self.current_character is None:
             raise ValueError('Character still not downloaded')
