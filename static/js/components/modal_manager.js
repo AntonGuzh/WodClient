@@ -9,12 +9,9 @@ document.addEventListener('alpine:init', () => {
         
         // Открыть модальное окно по id. Можно передать params, которые будут доступны через событие
         async open(id, params = {}) {
-            console.log('look 1', id);
-            if (this.stack.includes(id)) return; // уже открыто
-            console.log('look 2', id);
+            if (this.stack.includes(id)) return;
             
             this.stack.push({id, params});
-            console.log('look 2', this.stack);
             this._updateDisplay();
         },
 

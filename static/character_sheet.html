@@ -6,9 +6,10 @@
     <title>Бланк персонажа - Вампиры: Маскарад</title>
     <link rel="stylesheet" href="css/style.css">
 
-    <script src="js/api.js"></script>
-    <script src="js/components/mutable_tracker.js"></script>
-    <script src="js/components/modal_manager.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/components/mutable_tracker.js"></script>
+    <script defer src="js/components/modal_manager.js"></script>
+    <script defer src="js/components/advantages_list.js"></script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -207,7 +208,7 @@
             </template>
 
             <template x-if="currentModal?.id === 'addPowerModal'">
-                <div x-data="{ powers: null }" x-init="powers = await getDisciplinePowers(currentModal?.params.disciplineName, currentModal?.params.currentLevel)">
+                <div x-data="{ powers: null }" x-init="powers = await getDisciplinePowers(currentModal?.params.disciplineName, currentModal?.params.currentLevel + 1)">
                     <h3>Выберите способность</h3>
                     <div id="powersList" class="powers-list modal-body">
                         <template x-for="power in powers">
@@ -285,15 +286,15 @@
                             <h3>Физические</h3>
                             <div class="attribute">
                                 <span>Сила</span>
-                                <div x-data="mutable_tracker('strength', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('strength', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Ловкость</span>
-                                <div x-data="mutable_tracker('dexterity', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('dexterity', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Выносливость</span>
-                                <div x-data="mutable_tracker('stamina', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('stamina', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
 
@@ -301,15 +302,15 @@
                             <h3>Социальные</h3>
                             <div class="attribute">
                                 <span>Обаяние</span>
-                                <div x-data="mutable_tracker('charisma', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('charisma', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Манипуляция</span>
-                                <div x-data="mutable_tracker('manipulation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('manipulation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Самообладание</span>
-                                <div x-data="mutable_tracker('composure', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('composure', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
 
@@ -317,15 +318,15 @@
                             <h3>Ментальные</h3>
                             <div class="attribute">
                                 <span>Интеллект</span>
-                                <div x-data="mutable_tracker('intelligence', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('intelligence', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Смекалка</span>
-                                <div x-data="mutable_tracker('wits', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('wits', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="attribute">
                                 <span>Упорство</span>
-                                <div x-data="mutable_tracker('resolve', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('resolve', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
                     </div>
@@ -356,116 +357,116 @@
                         <div class="skills-column">
                             <div class="skill">
                                 <span>Атлетика</span>
-                                <div x-data="mutable_tracker('athletics', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('athletics', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Вождение</span>
-                                <div x-data="mutable_tracker('drive', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('drive', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Воровство</span>
-                                <div x-data="mutable_tracker('larceny', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('larceny', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Выживание</span>
-                                <div x-data="mutable_tracker('survival', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('survival', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Драка</span>
-                                <div x-data="mutable_tracker('brawl', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('brawl', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Ремесло</span>
-                                <div x-data="mutable_tracker('craft', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('craft', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Скрытность</span>
-                                <div x-data="mutable_tracker('stealth', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('stealth', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Стрельба</span>
-                                <div x-data="mutable_tracker('firearms', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('firearms', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Фехтование</span>
-                                <div x-data="mutable_tracker('melee', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('melee', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
                         <div class="skills-column">
                             <div class="skill">
                                 <span>Запугивание</span>
-                                <div x-data="mutable_tracker('intimidation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('intimidation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Исполнение</span>
-                                <div x-data="mutable_tracker('performance', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('performance', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Лидерство</span>
-                                <div x-data="mutable_tracker('leadership', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('leadership', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Обращение с животными</span>
-                                <div x-data="mutable_tracker('animal_ken', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('animal_ken', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Проницательность</span>
-                                <div x-data="mutable_tracker('insight', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('insight', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Убеждение</span>
-                                <div x-data="mutable_tracker('persuasion', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('persuasion', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Уличное чутьё</span>
-                                <div x-data="mutable_tracker('streetwise', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('streetwise', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Хитрость</span>
-                                <div x-data="mutable_tracker('subterfuge', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('subterfuge', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Этикет</span>
-                                <div x-data="mutable_tracker('etiquette', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('etiquette', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
                         <div class="skills-column">
                             <div class="skill">
                                 <span>Гуманитарные науки</span>
-                                <div x-data="mutable_tracker('humanities', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('humanities', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Естественные науки</span>
-                                <div x-data="mutable_tracker('science', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('science', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Медицина</span>
-                                <div x-data="mutable_tracker('medicine', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('medicine', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Наблюдательность</span>
-                                <div x-data="mutable_tracker('awareness', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('awareness', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Оккультизм</span>
                                 <div class="" id="occult" data-total="5" data-value="0" data-type="dot"></div>
-                                <div x-data="mutable_tracker('occult', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('occult', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Политика</span>
-                                <div x-data="mutable_tracker('politics', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('politics', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Расследование</span>
-                                <div x-data="mutable_tracker('investigation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('investigation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Техника</span>
-                                <div x-data="mutable_tracker('technology', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('technology', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                             <div class="skill">
                                 <span>Финансы</span>
-                                <div x-data="mutable_tracker('finance', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                                <div x-data="mutableTracker('finance', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
                         </div>
                     </div>
@@ -484,11 +485,7 @@
                 </div>
 
                 <!-- Преимущества и недостатки -->
-                <div class="advantages-section">
-                    <h3>Преимущества и недостатки</h3>
-                    <div class="advantages-list" id="advantages_container"></div>
-                    <button class="add-advantage-btn" onclick="addNewAdvantage()">+ Добавить преимущество/недостаток</button>
-                </div>
+                <div class="advantages-section" x-data="advantagesList()" x-html="render()"></div>
             </div>
 
             <!-- Правая колонка -->
@@ -501,18 +498,18 @@
                     </div>
                     <div class="tracker-small">
                         <h3>Голод</h3>
-                        <div x-data="mutable_tracker('hunger', 5, 'boxes bloody', 'box', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                        <div x-data="mutableTracker('hunger', 5, 'boxes bloody', 'box', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                     </div>
                     <div class="tracker-small">
                         <h3>Человечность</h3>
-                        <div x-data="mutable_tracker('humanity', 10, 'boxes', 'box', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                        <div x-data="mutableTracker('humanity', 10, 'boxes', 'box', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                     </div>
                 </div>
 
                 <!-- Сила Крови -->
                 <div class="blood-potency">
                     <h3>Сила Крови</h3>
-                    <div x-data="mutable_tracker('blood_potency', 10, 'dots bloody', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
+                    <div x-data="mutableTracker('blood_potency', 10, 'dots bloody', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                     <div class="blood-info">
                         <div class="info-item">
                             <label>Модификатор прилива Крови</label>
@@ -996,83 +993,6 @@
             });
         }
 
-        // Отрисовать все преимущества
-        function renderAdvantages(advantages) {
-            const container = document.getElementById('advantages_container');
-            container.innerHTML = '';
-            for (const [name, value] of Object.entries(advantages)) {
-                const row = createAdvantageRow(name, value);
-                container.appendChild(row);
-            }
-            Alpine.initTree(container);
-        }
-
-        // Создать одну строку
-        function createAdvantageRow(name, value) {
-            const div = document.createElement('div');
-            div.className = 'advantage-item';
-
-            // Поле ввода названия
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = name;
-            input.placeholder = 'Название';
-            input.addEventListener('blur', function() {
-                const newName = this.value.trim();
-                if (newName && newName !== name) {
-                    pywebview.api.rename_advantage(name, newName).then(() => {
-                        refreshAdvantages();
-                    });
-                } else if (!newName) {
-                    // Если пустое, удаляем
-                    pywebview.api.remove_advantage(name).then(() => {
-                        refreshAdvantages();
-                    });
-                }
-            });
-
-            // Контейнер для трекера с Alpine-атрибутами
-            const trackerContainer = document.createElement('div');
-            trackerContainer.setAttribute('x-data', `mutable_tracker('${name}', 5, 'dots', 'dot', getAdvantageValue, setAdvantageValue)`);
-            trackerContainer.setAttribute('x-html', 'render()');
-
-            // Кнопка удаления
-            const delBtn = document.createElement('span');
-            delBtn.className = 'power-remove';
-            delBtn.textContent = '❌';
-            delBtn.style.cursor = 'pointer';
-            delBtn.style.padding = '0px 10px'
-            delBtn.onclick = () => {
-                pywebview.api.remove_advantage(name).then(() => refreshAdvantages());
-            };
-
-            div.appendChild(input);
-            div.appendChild(trackerContainer);
-            div.appendChild(delBtn);
-            return div;
-        }
-
-        // Обновить весь список
-        function refreshAdvantages() {
-            pywebview.api.get_advantages().then(data => {
-                renderAdvantages(data);
-            });
-        }
-
-        // Добавить новое преимущество
-        function addNewAdvantage() {
-            const baseName = 'Новое преимущество';
-            pywebview.api.get_advantages().then(data => {
-                let counter = 1;
-                let newName = baseName;
-                while (data.hasOwnProperty(newName)) {
-                    counter++;
-                    newName = `${baseName} ${counter}`;
-                }
-                pywebview.api.add_advantage(newName).then(() => refreshAdvantages());
-            });
-        }
-
         document.querySelectorAll('textarea').forEach(textarea => {
             textarea.addEventListener('input', function () {
                 this.style.height = 'auto';
@@ -1094,7 +1014,6 @@
             });
 
             loadClans();
-            refreshAdvantages();   // загружаем преимущества
 
             // Настраиваем автосохранение
             setupAutoSave();

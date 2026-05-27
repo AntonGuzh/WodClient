@@ -233,8 +233,16 @@ class Api:
         """Возвращает текущий клан персонажа"""
         return self.character_controller.get_current_character().clan
     
+    # Костыль. Нужно починить, когда переделаю преимущества и недостатки
     def get_advantages(self):
-        return self.character_controller.get_current_character().advantages
+        advantages_dict = self.character_controller.get_current_character().advantages
+        res = []
+        for name, value in advantages_dict.items():
+            res.append({
+                'name': name,
+                'value': value,
+            })
+        return res
 
     def update_advantage(self, name: str, value: int) -> bool:
         return self.character_controller.get_current_character().update_advantage(name, value)

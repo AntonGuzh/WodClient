@@ -23,17 +23,6 @@ window.getBasicTrackerValue = (() => {
 
 window.setBasicTrackerValue = async (id, value) => {
     await callApi('update_basic_tracker', id, value);
-    cachedTrackers = null;
-};
-
-window.getAdvantageValue = async (id) => {
-    const rawData = await callApi('get_advantages');
-    advantages = new Map(Object.entries(rawData));
-    return advantages.get(id);
-};
-
-window.setAdvantageValue = async (id, value) => {
-    await callApi('update_advantage', id, value);
 };
 
 window.getDisciplineDetails = async (disciplineName) => {
@@ -49,6 +38,29 @@ window.getAllDisciplines = async () => {
 };
 
 window.getDisciplinePowers = async (disciplineName, currentLevel) => {
-    console.log('get_discipline_powers');
-    return await callApi('get_discipline_powers', disciplineName, currentLevel + 1)
+    return await callApi('get_discipline_powers', disciplineName, currentLevel);
+};
+
+window.getAdvantagesData = async () => {
+    return await callApi('get_advantages');
+};
+
+window.addAdvantage = async (newName) => {
+    return await callApi('add_advantage', newName);
+};
+
+window.removeAdvantage = async (name) => {
+    return await callApi('remove_advantage', name);
+};
+
+window.setAdvantageValue = async (name, value) => {
+    return await callApi('update_advantage', name, value);
+};
+
+window.renameAdvantage = async (oldName, newName) => {
+    return await callApi('rename_advantage', oldName, newName);
+};
+
+window.updateAdvantage = async (name, value) => {
+    return await callApi('update_advantage', name, value);
 };

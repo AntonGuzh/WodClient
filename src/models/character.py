@@ -80,7 +80,6 @@ class VampireCharacter:
     
     # Преимущества и недостатки (Advantages & Flaws)
     advantages: Dict[str, int] = field(default_factory=dict)
-    flaws: Dict[str, int] = field(default_factory=dict)
     
     # Дополнительные параметры
     resonance: str = ""  # Резонанс
