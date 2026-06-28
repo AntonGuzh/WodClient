@@ -10,6 +10,7 @@
     <script defer src="js/components/mutable_tracker.js"></script>
     <script defer src="js/components/modal_manager.js"></script>
     <script defer src="js/components/advantages_list.js"></script>
+    <script defer src="js/components/disciplines_list.js"></script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -125,7 +126,7 @@
                         <h2 x-text="data?.name"></h2>
                         <p><strong>Кратко:</strong> <span x-text="data?.short_description"></span></p>
                         <br>
-                        <button class="add-button" @click="addDiscipline(data?.name)">Добавить дисциплину</button>
+                        <button class="add-button" @click="addDisciplineButton(data?.name)">Добавить дисциплину</button>
                         <p><strong>Источник:</strong> <span x-text="data?.source"></span></p>
                         <div><strong>Общее правило:</strong> <span x-html="data?.general_rule"></span></div>
                         <div><strong>Описание:</strong> <span x-html="data?.description"></span></div>
@@ -156,7 +157,7 @@
                             <p><strong>Длительность:</strong> <span x-text="data?.duration"></span></p>
                         </template>
                         <template x-if="data?.amalgam">
-                            <p><strong>Амальгама:</strong> <span x-text="data?.amalgam.dicipline_name"></span> <span x-text="data?.amalgam.level"></span></p>
+                            <p><strong>Амальгама:</strong> <span x-text="data?.amalgam.discipline_name"></span> <span x-text="data?.amalgam.level"></span></p>
                         </template>
                     </div>
                 </div>
@@ -166,7 +167,7 @@
                 <div x-data="{ data: null }" x-init="data = await getPowerDetails(currentModal?.params.powerName)" class="modal-body">
                     <div class="details-content">
                         <h2 x-text="data?.name"></h2>
-                        <button class="add-button" @click="addPower(data?.discipline_name, data?.name)">Добавить способность</button>
+                        <button class="add-button" @click="addPowerButton(data?.discipline_name, data?.name)">Добавить способность</button>
                         <p><strong>Источник:</strong> <span x-text="data?.source"></span></p>
                         <p><strong>Уровень:</strong> <span x-text="data?.level"></span></p>
                         <p><strong>Кратко:</strong> <span x-text="data?.short_description"></span></p>
@@ -184,7 +185,7 @@
                             <p><strong>Длительность:</strong> <span x-text="data?.duration"></span></p>
                         </template>
                         <template x-if="data?.amalgam">
-                            <p><strong>Амальгама:</strong> <span x-text="data?.amalgam.dicipline_name"></span> <span x-text="data?.amalgam.level"></span></p>
+                            <p><strong>Амальгама:</strong> <span x-text="data?.amalgam.discipline_name"></span> <span x-text="data?.amalgam.level"></span></p>
                         </template>
                     </div>
                 </div>
@@ -194,7 +195,7 @@
                 <div x-data="{ disciplines: null }" x-init="disciplines = await getAllDisciplines()">
                     <h3>Выберите дисциплину</h3>
                     <div id="disciplinesList" class="disciplines-list modal-body">
-                        <template x-for="disc in disciplines">
+                        <template x-for="disc in disciplines || []" :key="disc.name">
                             <div class="discipline-list-item" :class="disc.is_clan ? 'clan-discipline' : ''" @click="open('disciplineDetailsForAddModal', {wide: true, diciplineName: disc.name})">
                                 <img :src="disc.icon" class="icon">
                                 <strong x-text="disc.name"></strong>
@@ -204,6 +205,7 @@
                                 </template>
                             </div>
                         </template>
+                    </div>
                 </div>
             </template>
 
@@ -211,7 +213,7 @@
                 <div x-data="{ powers: null }" x-init="powers = await getDisciplinePowers(currentModal?.params.disciplineName, currentModal?.params.currentLevel + 1)">
                     <h3>Выберите способность</h3>
                     <div id="powersList" class="powers-list modal-body">
-                        <template x-for="power in powers">
+                        <template x-for="power in powers || []" :key="power.name">
                             <div class="power-list-item" @click="open('powerDetailsForAddModal', {wide: true, powerName: power.name, disciplineName: power.discipline_name})">
                                 <strong x-text="power.name"></strong>
                                 <span class="short-desc" x-text="power.short_description"></span>
@@ -474,14 +476,7 @@
 
                 <!-- Дисциплины -->
                 <div class="section">
-                    <h2>ДИСЦИПЛИНЫ</h2>
-                    <div class="disciplines-container" id="disciplines_container">
-                        <!-- Кнопка добавления новой дисциплины -->
-                        <div class="add-discipline-btn" onclick="window.modalManager.open('addDisciplineModal', {wide: true})">
-                            <span>+ Добавить дисциплину</span>
-                        </div>
-                        <!-- Сюда будут рендериться дисциплины персонажа -->
-                    </div>
+                    <div x-data="disciplinesList()" x-html="render()"></div>
                 </div>
 
                 <!-- Преимущества и недостатки -->
@@ -864,87 +859,18 @@
             });
         }
 
-        // Отрисовка дисциплин персонажа
-        function renderCharacterDisciplines(data) {
-            const container = document.getElementById('disciplines_container');
-            if (!container) return;
-            
-            const addBtn = container.querySelector('.add-discipline-btn');
-            container.innerHTML = '';
-            if (addBtn) container.appendChild(addBtn);
-            
-            for (const [discName, discData] of Object.entries(data)) {
-                const discCard = document.createElement('div');
-                discCard.className = 'discipline-card';
-                
-                // Заголовок дисциплины
-                const header = document.createElement('div');
-                header.className = 'discipline-header';
-                header.onclick = () => window.modalManager.open('disciplineDetailsModal', {wide: true, diciplineName: discName});
-                
-                header.innerHTML = `
-                    <img src="${discData.info.icon || 'img/default.png'}" class="discipline-icon">
-                    <span class="discipline-title">${discName}</span>
-                    <div class="discipline-level">
-                        ${Array(5).fill(0).map((_, i) => 
-                            `<span class="dot ${i < discData.level ? 'filled' : ''} not-clickable"></span>`
-                        ).join('')}
-                    </div>
-                    <div class="discipline-actions">
-                        <button onclick="window.modalManager.open('addPowerModal', {wide: true, disciplineName: '${discName}', currentLevel: ${discData.level}})">➕</button>
-                        <button onclick="removeDiscipline('${discName}'); event.stopPropagation();">❌</button>
-                    </div>
-                `;
-                
-                discCard.appendChild(header);
-                
-                // Способности дисциплины
-                if (discData.powers.length > 0) {
-                    const powersDiv = document.createElement('div');
-                    powersDiv.className = 'discipline-powers';
-                    
-                    discData.powers.forEach(powerName => {
-                        const powerItem = document.createElement('div');
-                        powerItem.className = 'power-item';
-                        powerItem.onclick = () => window.modalManager.open('powerDetailsModal', {wide: true, powerName: powerName});
-                        
-                        powerItem.innerHTML = `
-                            <span class="power-name">${powerName}</span>
-                            <span class="power-remove" onclick="removePower('${discName}', '${powerName}'); event.stopPropagation();">❌</span>
-                        `;
-                        
-                        powersDiv.appendChild(powerItem);
-                    });
-                    
-                    discCard.appendChild(powersDiv);
-                }
-                
-                container.appendChild(discCard);
-            }
-        }
-
         // Добавление дисциплины персонажу
-        function addDiscipline(disciplineName) {
-            pywebview.api.add_discipline_to_character(disciplineName).then(() => {
-                window.modalManager.close();
-            });
-        }
-
-        // Удаление дисциплины
-        function removeDiscipline(disciplineName) {
-            pywebview.api.remove_discipline_from_character(disciplineName);
+        async function addDisciplineButton(disciplineName) {
+            console.log('addDisciplineButton sheet');
+            await window.disciplinesList.addDiscipline(disciplineName);
+            window.modalManager.close();
         }
 
         // Добавление способности
-        function addPower(disciplineName, powerName) {
-            pywebview.api.add_power_to_character(disciplineName, powerName).then(() => {
-                window.modalManager.close();
-            });
-        }
-
-        // Удаление способности
-        function removePower(disciplineName, powerName) {
-            pywebview.api.remove_power_from_character(disciplineName, powerName);
+        async function addPowerButton(disciplineName, powerName) {
+            console.log('addPowerButton sheet');
+            await window.disciplinesList.addPower(disciplineName, powerName);
+            window.modalManager.close();
         }
 
         // Загружаем список кланов
@@ -1006,11 +932,6 @@
             // Загружаем текстовые поля
             pywebview.api.get_autofilled_texts().then(fields => {
                 updateAllAutofilledTextFields(fields);
-            });
-
-            // Загружаем дисциплины персонажа
-            pywebview.api.get_character_disciplines().then(disciplines => {
-                renderCharacterDisciplines(disciplines);
             });
 
             loadClans();

@@ -8,8 +8,6 @@ document.addEventListener('alpine:init', () => {
         async init() {
             let data = await window.getAdvantagesData();
 
-            console.log(data);
-
             this.advantageList = data.map(item => ({
                 name: item.name,
                 value: item.value,

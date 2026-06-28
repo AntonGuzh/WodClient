@@ -64,3 +64,27 @@ window.renameAdvantage = async (oldName, newName) => {
 window.updateAdvantage = async (name, value) => {
     return await callApi('update_advantage', name, value);
 };
+
+window.getCharacterDisciplines = async () => {
+    return await callApi('get_character_disciplines');
+};
+
+window.addDiscipline = async (disciplineName) => {
+    return await callApi('add_discipline_to_character', disciplineName);
+};
+
+window.getDiscipline = async (disciplineName) => {
+    return await callApi('get_discipline_details', disciplineName);
+}
+
+window.removeDiscipline = async (disciplineName) => {
+    return await callApi('remove_discipline_from_character', disciplineName);
+};
+
+window.addPower = async (disciplineName, powerName) => {
+    return await callApi('add_power_to_character', disciplineName, powerName);
+};
+
+window.removePower = async (disciplineName, powerName) => {
+    return await callApi('remove_power_from_character', disciplineName, powerName);
+};

@@ -168,14 +168,12 @@ class Api:
         for disc in self.disciplines_controller.get_disciplines_list():
             if disc.name == discipline_name:
                 self.character_controller.get_current_character().add_discipline(discipline_name)
-                self.update_disciplines_display()
                 return True
         return False
     
     def remove_discipline_from_character(self, discipline_name: str) -> bool:
         """Удаляет дисциплину у персонажа"""
         self.character_controller.get_current_character().remove_discipline(discipline_name)
-        self.update_disciplines_display()
         return True
     
     def add_power_to_character(self, discipline_name: str, power_name: str) -> bool:
@@ -184,34 +182,27 @@ class Api:
         for power in self.disciplines_controller.disciplines[discipline_name]:
             if power.name == power_name:
                 self.character_controller.get_current_character().add_power(power_name, discipline_name)
-                self.update_disciplines_display()
                 return True
         return False
     
     def remove_power_from_character(self, discipline_name: str, power_name: str) -> bool:
         """Удаляет способность у персонажа"""
         self.character_controller.get_current_character().remove_power(discipline_name, power_name)
-        self.update_disciplines_display()
         return True
     
     def get_character_disciplines(self) -> dict:
         """Возвращает дисциплины персонажа с их способностями и уровнями"""
-        result = {}
+        result = []
         for disc_name, powers in self.character_controller.get_current_character().disciplines.items():
             # Получаем полную информацию о дисциплине
             disc_info = self.get_discipline_details(disc_name)
-            result[disc_name] = {
+            result.append({
+                'name': disc_name,
                 'info': disc_info,
                 'level': len(powers),
                 'powers': powers
-            }
+            })
         return result
-    
-    def update_disciplines_display(self):
-        """Обновляет отображение дисциплин в интерфейсе"""
-        if self.window:
-            data = self.get_character_disciplines()
-            self.window.evaluate_js(f'renderCharacterDisciplines({json.dumps(data)})')
     
     def get_clans_list(self):
         """Возвращает список всех кланов"""

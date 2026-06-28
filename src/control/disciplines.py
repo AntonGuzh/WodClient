@@ -13,6 +13,7 @@ class DisciplinesController:
         self.disciplines: Dict[Discipline, List[DisciplinePower]] = self.load_disciplines()
 
     def get_disciplines_list(self):
+        print(self.disciplines.keys())
         return self.disciplines.keys()
     
     def get_discipline_powers(self, discipline: str, level: int):
