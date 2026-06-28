@@ -8,6 +8,7 @@
 
     <script defer src="js/api.js"></script>
     <script defer src="js/components/mutable_tracker.js"></script>
+    <script defer src="js/components/life_tracker.js"></script>
     <script defer src="js/components/modal_manager.js"></script>
     <script defer src="js/components/advantages_list.js"></script>
     <script defer src="js/components/disciplines_list.js"></script>
@@ -338,20 +339,8 @@
 
                 <!-- Здоровье и Воля -->
                 <div class="trackers">
-                    <div class="tracker">
-                        <h3>Здоровье</h3>
-                        <div class="boxes" id="health-boxes">
-                            <span class="box"></span><span class="box"></span><span class="box"></span><span class="box"></span><span class="box"></span>
-                            <span class="box"></span><span class="box"></span><span class="box"></span><span class="box"></span><span class="box"></span>
-                        </div>
-                    </div>
-                    <div class="tracker">
-                        <h3>Воля</h3>
-                        <div class="boxes" id="willpower-boxes">
-                            <span class="box"></span><span class="box"></span><span class="box"></span><span class="box"></span><span class="box"></span>
-                            <span class="box"></span><span class="box"></span><span class="box"></span><span class="box"></span><span class="box"></span>
-                        </div>
-                    </div>
+                    <div class="tracker" x-data="lifeTracker('health', 'Здоровье', { max: 'max_health', hard: 'hard_health_damage', light: 'light_health_damage' })" x-html="render()"></div>
+                    <div class="tracker" x-data="lifeTracker('willpower', 'Воля', { max: 'max_willpower', hard: 'hard_willpower_damage', light: 'light_willpower_damage' })" x-html="render()"></div>
                 </div>
 
                 <!-- Навыки -->
@@ -627,8 +616,7 @@
                 return;
             }
             
-            // Вызываем Python функцию
-            pywebview.api.apply_damage(amount, isHeavy, halve).then(result => {
+            window.applyHealthDamage(amount, isHeavy, halve).then(result => {
                 console.log('Урон применён:', result);
                 window.modalManager.close();
             });
@@ -644,28 +632,10 @@
                 return;
             }
             
-            pywebview.api.apply_stress(amount, isHeavy, halve).then(result => {
+            window.applyWillpowerDamage(amount, isHeavy, halve).then(result => {
                 console.log('Стресс применён:', result);
                 window.modalManager.close();
             });
-        }
-
-        // Функция лечения
-        function healDamage(trackerId, isHeavy) {
-            // trackerId: 'health' или 'willpower'
-            // isHeavy: true = убираем тяжёлое ранение, false = убираем лёгкое
-            
-            let amount = -1;  // отрицательное значение = лечение
-            
-            if (trackerId === 'health') {
-                pywebview.api.apply_damage(amount, isHeavy, false).then(result => {
-                    console.log('Лечение здоровья применено:', result);
-                });
-            } else if (trackerId === 'willpower') {
-                pywebview.api.apply_stress(amount, isHeavy, false).then(result => {
-                    console.log('Лечение воли применено:', result);
-                });
-            }
         }
         
         // Соответствие типов результатов картинкам
@@ -813,41 +783,13 @@
         // Обновление обоих трекеров жизни и воли
         function updateLifeStats(data) {
             console.log('Получены данные:', data);
-            updateLifeTracker('health', data.max_health, data.hard_health_damage, data.light_health_damage);
-            updateLifeTracker('willpower', data.max_willpower, data.hard_willpower_damage, data.light_willpower_damage);
-        }
+            window.lifeStatsData = data;
 
-        // Универсальная функция для одного трекера
-        function updateLifeTracker(trackerId, maxVal, hard, light) {
-            const container = document.getElementById(trackerId + '-boxes');
-            if (!container) return;
-            const boxes = container.querySelectorAll('.box');
-            const total = boxes.length; // всегда 10
+            if (!window.lifeTrackers) {
+                return;
+            }
 
-            boxes.forEach((box, index) => {
-                // Сбрасываем классы состояния
-                box.classList.remove('filled', 'hard', 'light');
-
-                if (index < hard) {
-                    box.classList.add('hard');
-                    box.classList.remove('not-clickable');
-                    box.onclick = function() {
-                        healDamage(trackerId, true);  // true = тяжёлое
-                    };
-                } else if (index < hard + light) {
-                    box.classList.add('light');
-                    box.classList.remove('not-clickable');
-                    box.onclick = function() {
-                        healDamage(trackerId, false);  // false = лёгкое
-                    };
-                } else if (index < maxVal) {
-                    box.classList.add('not-clickable');
-                } else {
-                    box.classList.add('filled');
-                    box.classList.add('not-clickable');
-                }
-                // иначе остаётся пустым
-            });
+            Object.values(window.lifeTrackers).forEach(tracker => tracker.setStats(data));
         }
 
         // Добавление дисциплины персонажу

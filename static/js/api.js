@@ -25,6 +25,18 @@ window.setBasicTrackerValue = async (id, value) => {
     await callApi('update_basic_tracker', id, value);
 };
 
+window.getLifeStats = async () => {
+    return await callApi('get_life_stats');
+};
+
+window.applyHealthDamage = async (amount, isHeavy, halve) => {
+    return await callApi('apply_damage', amount, isHeavy, halve);
+};
+
+window.applyWillpowerDamage = async (amount, isHeavy, halve) => {
+    return await callApi('apply_stress', amount, isHeavy, halve);
+};
+
 window.updateTextField = async (id, value) => {
     return await callApi('update_text_field', id, value);
 };

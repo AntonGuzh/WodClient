@@ -63,3 +63,7 @@ desktop.ini
 
 # Журналы pywebview
 webview.log
+
+# Инструкции для ИИ
+AGENTS.md
+.codex/
