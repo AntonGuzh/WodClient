@@ -104,3 +104,31 @@ window.addPower = async (disciplineName, powerName) => {
 window.removePower = async (disciplineName, powerName) => {
     return await callApi('remove_power_from_character', disciplineName, powerName);
 };
+
+window.getClansList = async () => {
+    return await callApi('get_clans_list');
+};
+
+window.getCharacterClan = async () => {
+    return await callApi('get_character_clan');
+};
+
+window.setCharacterClan = async (clanName) => {
+    return await callApi('set_character_clan', clanName);
+};
+
+window.getClanBane = async (clanName) => {
+    return await callApi('get_clan_bane', clanName);
+};
+
+window.getClanDetails = async (clanName) => {
+    return await callApi('get_clan_details', clanName);
+};
+
+window.getBloodStats = async () => {
+    return await callApi('get_blood_stats');
+};
+
+window.updateDisplay = async () => {
+    return await callApi('update_display');
+};

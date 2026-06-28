@@ -60,8 +60,8 @@ class Api:
             text_fields = self.get_all_text_fields()
             self.window.evaluate_js(f'updateAllTextFields({json.dumps(text_fields)})')
 
-            autofilled_texts = self.get_autofilled_texts()
-            self.window.evaluate_js(f'updateAllAutofilledTextFields({json.dumps(autofilled_texts)})')
+            blood_stats = self.get_blood_stats()
+            self.window.evaluate_js(f'updateBloodStatsTexts({json.dumps(blood_stats)})')
 
     def update_text_field(self, field_id, value):
         char = self.character_controller.get_current_character()
@@ -105,16 +105,10 @@ class Api:
         
         return (successes, new_dice_details, special_str)
     
-    def get_autofilled_texts(self):
+    def get_blood_stats(self):
         blood_stats = deepcopy(self.character_controller.get_current_character().get_blood_stats())
         blood_stats['feeding_penalty'] = blood_stats['feeding_penalty'].replace('.', '.<br>')
-
-        bane = self.get_clan_bane(self.character_controller.get_current_character().clan).format(bane_severity=blood_stats['bane_severity'])
-
-        return {
-            **blood_stats,
-            **{'clan_bane': bane},
-        }
+        return blood_stats
     
     def get_all_disciplines(self):
         """Возвращает список всех доступных дисциплин для отображения в модальном окне"""
@@ -214,6 +208,13 @@ class Api:
             if clan.name == clan_name:
                 return clan.bane_short_description
         return ""
+
+    def get_clan_details(self, clan_name: str) -> dict:
+        """Возвращает полную информацию о клане"""
+        for clan in self.clans_controller.get_clans():
+            if clan.name == clan_name:
+                return clan.to_dict()
+        return {}
     
     def set_character_clan(self, clan_name: str) -> bool:
         """Устанавливает клан персонажа"""

@@ -12,6 +12,8 @@
     <script defer src="js/components/modal_manager.js"></script>
     <script defer src="js/components/advantages_list.js"></script>
     <script defer src="js/components/disciplines_list.js"></script>
+    <script defer src="js/components/icon_info_selector.js"></script>
+    <script defer src="js/components/clan_manager.js"></script>
     <script defer src="js/components/text_input_field.js"></script>
     <script defer src="js/components/text_area_field.js"></script>
 
@@ -166,6 +168,20 @@
                 </div>
             </template>
 
+            <template x-if="currentModal?.id === 'clanDetailsModal'">
+                <div x-data="{ data: null }" x-init="data = await getClanDetails(currentModal?.params.clanName)" class="modal-body">
+                    <div class="details-content clan-details-content">
+                        <img :src="data?.icon">
+                        <h2 x-text="data?.name"></h2>
+                        <p><strong>Источник:</strong> <span x-text="data?.source"></span></p>
+                        <p><strong>Дисциплины:</strong> <span x-text="(data?.disciplines || []).join(', ')"></span></p>
+                        <div><strong>Кто такие:</strong> <span x-html="data?.who_is_clan"></span></div>
+                        <div><strong>Описание:</strong> <span x-html="data?.description"></span></div>
+                        <div><strong>Изъян:</strong> <span x-html="data?.bane_description"></span></div>
+                    </div>
+                </div>
+            </template>
+
             <template x-if="currentModal?.id === 'powerDetailsForAddModal'">
                 <div x-data="{ data: null }" x-init="data = await getPowerDetails(currentModal?.params.powerName)" class="modal-body">
                     <div class="details-content">
@@ -230,7 +246,7 @@
     </div>
 
     <!-- Остальной HTML остаётся без изменений -->
-    <div class="character-sheet">
+    <div class="character-sheet" x-data="clanManager()">
         <!-- Шапка -->
         <div class="header">
             <div class="header-row">
@@ -256,12 +272,7 @@
                     <label>Цель</label>
                     <input type="text" id="ambition" x-data="textInputField('ambition')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
-                <div class="field">
-                    <label>Клан</label>
-                    <select id="clan">
-                        <option value="">Выберите клан</option>
-                    </select>
-                </div>
+                <div class="field" x-html="render('selector')"></div>
             </div>
             <div class="header-row">
                 <div class="field">
@@ -537,10 +548,7 @@
                 </div>
 
                 <!-- Клановый изъян -->
-                <div class="text-section">
-                    <h3>Клановый изъян</h3>
-                    <p class="autofilled_text" id="clan_bane"></p>
-                </div>
+                <div class="text-section" x-html="render('bane')"></div>
 
                 <!-- Опыт -->
                 <div class="experience">
@@ -741,6 +749,11 @@
         // Функция для обновления всех вводимых текстовых полей при загрузке
         function updateAllTextFields(fields) {
             for (const [fieldId, value] of Object.entries(fields)) {
+                if (fieldId === 'clan' && window.clanManager) {
+                    window.clanManager.setClan(value);
+                    continue;
+                }
+
                 if (window.textInputFields?.[fieldId]) {
                     window.textInputFields[fieldId].setValue(value);
                     continue;
@@ -770,13 +783,17 @@
             }
         }
         
-        // Функция для обновления всех автозаполняемых текстовых полей
-        function updateAllAutofilledTextFields(fields) {
+        // Функция для обновления показателей крови
+        function updateBloodStatsTexts(fields) {
             for (const [fieldId, value] of Object.entries(fields)) {
                 const element = document.getElementById(fieldId);
                 if (element) {
                     element.innerHTML = value;
                 }
+            }
+
+            if (window.clanManager) {
+                window.clanManager.refreshClanBane();
             }
         }
 
@@ -806,46 +823,6 @@
             window.modalManager.close();
         }
 
-        // Загружаем список кланов
-        function loadClans() {
-            pywebview.api.get_clans_list().then(clans => {
-                const select = document.getElementById('clan');
-                select.innerHTML = '<option value="">Выберите клан</option>';
-                clans.forEach(clan => {
-                    const option = document.createElement('option');
-                    option.value = clan.name;
-                    option.textContent = clan.name;
-                    select.appendChild(option);
-                });
-
-                // Устанавливаем текущий клан персонажа
-                pywebview.api.get_character_clan().then(currentClan => {
-                    if (currentClan) {
-                        select.value = currentClan;
-                    }
-                });
-            });
-        }
-
-        // Обновление отображения кланового изъяна
-        function updateClanBane(clanName) {
-            if (clanName) {
-                pywebview.api.get_clan_bane(clanName).then(bane => {
-                    document.getElementById('clan_bane').innerHTML = bane;
-                });
-            } else {
-                document.getElementById('clan_bane').innerHTML = '';
-            }
-        }
-
-        // Обработчик изменения клана
-        document.getElementById('clan').addEventListener('change', function(e) {
-            const clanName = e.target.value;
-            pywebview.api.set_character_clan(clanName).then(() => {
-                pywebview.api.update_display();
-            });
-        });
-
         function renderCharacterList() {
             pywebview.api.save_character().then(() => {
                 window.location.href = 'index.html';
@@ -855,13 +832,10 @@
         // Загружаем сохранённые значения из Python при старте
         window.addEventListener('pywebviewready', function() {
             console.log('pywebviewready');
-            // Загружаем текстовые поля
-            pywebview.api.get_autofilled_texts().then(fields => {
-                updateAllAutofilledTextFields(fields);
+            // Загружаем показатели крови
+            window.getBloodStats().then(fields => {
+                updateBloodStatsTexts(fields);
             });
-
-            loadClans();
-
             // Отображаем всё
             pywebview.api.update_display()
         });
