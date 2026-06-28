@@ -132,16 +132,24 @@ class Api:
     def roll_hunger_dice(self, count, hunger_count):
         return self._roll_dice_with_hunger(count, hunger_count)
 
+    def reroll_dice(self, count, hunger_count, previous_results, rerolling_indexes):
+        previous_results = [dices.Result(result) for result in previous_results]
+        successes, dice_details, special = dices.reroll_dices(count, hunger_count, previous_results, rerolling_indexes)
+        return self._format_dice_result(successes, dice_details, special)
+
     def _roll_dice_with_hunger(self, count, hunger_value):
         successes, dice_details, special = dices.roll_dices(count, hunger_value)
-    
+
+        return self._format_dice_result(successes, dice_details, special)
+
+    def _format_dice_result(self, successes, dice_details, special):
         new_dice_details = []
         for d in dice_details:
             new_d = dict()
             new_d['result'] = d.value
             new_dice_details.append(new_d)
         special_str = (special[0].value, special[1].value)
-        
+
         return (successes, new_dice_details, special_str)
     
     def get_blood_stats(self):

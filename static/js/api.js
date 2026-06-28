@@ -11,18 +11,20 @@ const callApi = async (method, ...args) => {
     return pywebview.api[method](...args);
 };
 
-window.getBasicTrackerValue = (() => {
-    let cachedTrackers = null;
-    return async (id) => {
-        if (cachedTrackers) return cachedTrackers.get(id);
-        let rawData = await callApi('get_basic_trackers');
-        cachedTrackers = new Map(Object.entries(rawData));
-        return cachedTrackers.get(id);
-    };
-})();
+let cachedBasicTrackers = null;
+
+window.getBasicTrackerValue = async (id) => {
+    if (cachedBasicTrackers) return cachedBasicTrackers.get(id);
+    let rawData = await callApi('get_basic_trackers');
+    cachedBasicTrackers = new Map(Object.entries(rawData));
+    return cachedBasicTrackers.get(id);
+};
 
 window.setBasicTrackerValue = async (id, value) => {
     await callApi('update_basic_tracker', id, value);
+    if (cachedBasicTrackers) {
+        cachedBasicTrackers.set(id, value);
+    }
 };
 
 window.getSkillSpecializations = async (skillId) => {
@@ -67,6 +69,10 @@ window.rollDice = async (count, hungry) => {
 
 window.rollHungerDice = async (count, hungerCount) => {
     return await callApi('roll_hunger_dice', count, hungerCount);
+};
+
+window.rerollDice = async (count, hungerCount, previousResults, rerollingIndexes) => {
+    return await callApi('reroll_dice', count, hungerCount, previousResults, rerollingIndexes);
 };
 
 window.updateTextField = async (id, value) => {

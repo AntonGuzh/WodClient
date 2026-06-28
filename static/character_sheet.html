@@ -112,6 +112,8 @@
                         <!-- Особые результаты -->
                         <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
 
+                        <button id="willpowerRerollButton" class="modal-submit" onclick="rerollSelectedDice()" disabled>Перебросить за силу воли</button>
+
                         <!-- Кнопка нового броска -->
                         <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
                     </div>
@@ -764,6 +766,8 @@
             5: 'img/dices/CRITICAL_SUCCESS.png',
             6: 'img/dices/MESSY_CRITICAL.png'
         };
+        const normalDiceResults = new Set([0, 3, 5]);
+        let currentBaseDiceRoll = null;
 
         // Функция для форматирования типа результата в читаемый текст (для подсказок)
         function getResultDescription(result) {
@@ -779,18 +783,32 @@
             return descriptions[result] || result;
         }
 
-        function renderDiceResults(diceDetails) {
+        function renderDiceResults(diceDetails, allowSelection = false) {
             const container = document.getElementById('diceResultsContainer');
             container.innerHTML = '';
             
-            diceDetails.forEach(detail => {
+            diceDetails.forEach((detail, index) => {
                 const img = document.createElement('img');
                 img.className = 'dice-image';
                 img.src = diceImages[detail.result] || diceImages['failure'];
                 img.alt = detail.result;
                 img.title = getResultDescription(detail.result);
+
+                if (allowSelection) {
+                    img.classList.add('selectable');
+                    img.dataset.index = index;
+
+                    if (currentBaseDiceRoll?.selectedIndexes.has(index)) {
+                        img.classList.add('selected');
+                    }
+
+                    img.addEventListener('click', () => toggleDiceSelection(index, img));
+                }
+
                 container.appendChild(img);
             });
+
+            updateWillpowerRerollButton();
         }
 
         function renderSpecialResults(specialTuple, message = '', showTypes = true) {
@@ -833,32 +851,107 @@
             `;
         }
 
-        function showDiceResult(result, message = '', showTypes = true) {
+        function showDiceResult(result, message = '', showTypes = true, allowReroll = false) {
             // result = [successes, diceDetails, specialTuple]
             const successes = result[0];
             const diceDetails = result[1];
             const specialTuple = result[2];
 
             document.getElementById('successCount').textContent = successes;
-            renderDiceResults(diceDetails);
+            renderDiceResults(diceDetails, allowReroll);
             renderSpecialResults(specialTuple, message, showTypes);
 
             document.getElementById('diceInputSection').style.display = 'none';
             document.getElementById('diceResultSection').style.display = 'block';
         }
 
-        function rollBaseDice() {
+        function isNormalDice(index) {
+            const result = currentBaseDiceRoll?.diceDetails[index]?.result;
+            return normalDiceResults.has(result);
+        }
+
+        function shakeDice(img) {
+            img.classList.remove('shake');
+            void img.offsetWidth;
+            img.classList.add('shake');
+        }
+
+        function toggleDiceSelection(index, img) {
+            if (!currentBaseDiceRoll?.canReroll || !isNormalDice(index)) {
+                shakeDice(img);
+                return;
+            }
+
+            if (currentBaseDiceRoll.selectedIndexes.has(index)) {
+                currentBaseDiceRoll.selectedIndexes.delete(index);
+                img.classList.remove('selected');
+                updateWillpowerRerollButton();
+                return;
+            }
+
+            if (currentBaseDiceRoll.selectedIndexes.size >= 3) {
+                shakeDice(img);
+                return;
+            }
+
+            currentBaseDiceRoll.selectedIndexes.add(index);
+            img.classList.add('selected');
+            updateWillpowerRerollButton();
+        }
+
+        function updateWillpowerRerollButton() {
+            const button = document.getElementById('willpowerRerollButton');
+            if (!button) {
+                return;
+            }
+
+            button.disabled = !currentBaseDiceRoll?.canReroll || currentBaseDiceRoll.selectedIndexes.size === 0;
+        }
+
+        async function rollBaseDice() {
             const count = parseInt(document.getElementById('diceCount').value);
             
             if (!count || count < 1) {
                 alert('Введите корректное количество кубиков');
                 return;
             }
-            
-            window.rollDice(count, true).then(result => showDiceResult(result));
+
+            const hunger = parseInt(await window.getBasicTrackerValue('hunger')) || 0;
+            const result = await window.rollDice(count, true);
+            currentBaseDiceRoll = {
+                count,
+                hungerCount: Math.min(count, hunger),
+                diceDetails: result[1],
+                selectedIndexes: new Set(),
+                canReroll: true,
+            };
+            showDiceResult(result, '', true, true);
+        }
+
+        async function rerollSelectedDice() {
+            if (!currentBaseDiceRoll?.canReroll || currentBaseDiceRoll.selectedIndexes.size === 0) {
+                return;
+            }
+
+            const selectedIndexes = Array.from(currentBaseDiceRoll.selectedIndexes);
+            const previousResults = currentBaseDiceRoll.diceDetails.map(detail => detail.result);
+            currentBaseDiceRoll.canReroll = false;
+            updateWillpowerRerollButton();
+
+            const result = await window.rerollDice(
+                currentBaseDiceRoll.count,
+                currentBaseDiceRoll.hungerCount,
+                previousResults,
+                selectedIndexes,
+            );
+
+            currentBaseDiceRoll.diceDetails = result[1];
+            currentBaseDiceRoll.selectedIndexes = new Set();
+            showDiceResult(result, '', true, false);
         }
 
         function rollRouseCheck() {
+            currentBaseDiceRoll = null;
             window.rollHungerDice(1, 1).then(result => {
                 const message = result[0] >= 1
                     ? 'Ваш голод не изменился'
@@ -879,6 +972,7 @@
         }
 
         async function rollFrenzyTest() {
+            currentBaseDiceRoll = null;
             const count = await getFrenzyDiceCount();
 
             const result = await window.rollDice(count, false);
@@ -893,6 +987,7 @@
         }
 
         async function rollRemorse() {
+            currentBaseDiceRoll = null;
             const count = await getRemorseDiceCount();
 
             const result = await window.rollDice(count, false);
@@ -917,6 +1012,8 @@
             document.getElementById('successCount').textContent = '0';
             document.getElementById('diceResultsContainer').innerHTML = '';
             document.getElementById('specialResults').innerHTML = '';
+            currentBaseDiceRoll = null;
+            updateWillpowerRerollButton();
         }
 
         // Функция для обновления всех вводимых текстовых полей при загрузке
