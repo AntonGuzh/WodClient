@@ -8,6 +8,11 @@ from src.utils import resource_path
 
 os.environ['WEBKIT_DISABLE_DMABUF_RENDERER'] = '1'
 
+
+def is_debug_enabled():
+    return os.environ.get('WOD_DEBUG', '').lower() in ('1', 'true', 'yes', 'on')
+
+
 def periodic_save(api, interval_seconds):
     """Фоновая функция: каждые interval_seconds вызывает save_character."""
     while True:
@@ -38,7 +43,7 @@ if __name__ == "__main__":
     )
     autosave_thread.start()
 
-    webview.start(debug=True)
+    webview.start(debug=is_debug_enabled())
 
     print('Finished')
     api.character_controller.save_character()
