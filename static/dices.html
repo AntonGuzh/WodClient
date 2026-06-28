@@ -25,7 +25,7 @@
             top: 0;
             left: 0;
         }
-        
+
         #ui {
             position: fixed;
             top: 20px;
@@ -47,7 +47,8 @@
             font-size: 16px;
         }
         
-        #diceCount {
+        #diceCount,
+        #bloodDiceCount {
             width: 60px;
             padding: 8px 12px;
             font-size: 16px;
@@ -114,6 +115,24 @@
             font-size: 32px;
             font-weight: bold;
         }
+
+        .result-row + .result-row {
+            margin-top: 14px;
+        }
+
+        .result-label {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 12px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blood-total {
+            color: #ef4444;
+            font-size: 32px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -122,13 +141,23 @@
     <div id="ui">
         <label for="diceCount">Количество d10:</label>
         <input type="number" id="diceCount" min="1" max="10" value="2">
+        <label for="bloodDiceCount">Красные d10:</label>
+        <input type="number" id="bloodDiceCount" min="0" max="10" value="0">
         <button id="rollButton">🎲 Бросить!</button>
     </div>
     
     <div id="result">
         <h2>Результат</h2>
-        <div id="resultValues">-</div>
-        <div id="resultTotal">0</div>
+        <div class="result-row">
+            <div class="result-label">Обычные</div>
+            <div id="resultValues">-</div>
+            <div id="resultTotal">0</div>
+        </div>
+        <div class="result-row">
+            <div class="result-label">Красные</div>
+            <div id="bloodResultValues">-</div>
+            <div id="bloodResultTotal" class="blood-total">0</div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -272,44 +301,81 @@
             });
         }
 
-        // Создание текстуры для грани с номером
-        function createFaceTexture(label) {
+        const diceIconPaths = {
+            normalSuccess: 'img/dices/SUCCESS_ICON.png',
+            normalCriticalSuccess: 'img/dices/CRITICAL_SUCCESS_ICON.png',
+            bloodBestialFailure: 'img/dices/BESTIAL_FAILURE_ICON.png',
+            bloodSuccess: 'img/dices/BLOOD_SUCCESS_ICON.png',
+            bloodMessyCritical: 'img/dices/MESSY_CRITICAL_ICON.png'
+        };
+
+        const diceFaceColors = {
+            normal: '#2c2c2c',
+            blood: '#be0000'
+        };
+
+        // Размер картинки внутри грани: меньше 1.0 = меньше картинка, больше 1.0 = крупнее.
+        const DICE_ICON_FACE_SCALE = 0.5;
+
+        const diceIconTextures = {
+            normalSuccess: loadDiceIconTexture(diceIconPaths.normalSuccess),
+            normalCriticalSuccess: loadDiceIconTexture(diceIconPaths.normalCriticalSuccess),
+            bloodBestialFailure: loadDiceIconTexture(diceIconPaths.bloodBestialFailure),
+            bloodSuccess: loadDiceIconTexture(diceIconPaths.bloodSuccess),
+            bloodMessyCritical: loadDiceIconTexture(diceIconPaths.bloodMessyCritical)
+        };
+
+        function loadDiceIconTexture(src) {
             const canvas = document.createElement('canvas');
             canvas.width = 256;
             canvas.height = 256;
             const ctx = canvas.getContext('2d');
-            
-            // Фон грани - тёмно-красный
-            ctx.fillStyle = '#2c2c2c';
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.anisotropy = 4;
+
+            const image = new Image();
+            image.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const size = canvas.width * DICE_ICON_FACE_SCALE;
+                const offset = (canvas.width - size) / 2;
+                ctx.drawImage(image, offset, offset, size, size);
+                texture.needsUpdate = true;
+            };
+            image.src = src;
+
+            return texture;
+        }
+
+        function getFaceIconTexture(label, dieType) {
+            const value = parseInt(label, 10);
+            if (dieType === 'blood') {
+                if (value === 1) return diceIconTextures.bloodBestialFailure;
+                if (value >= 6 && value <= 9) return diceIconTextures.bloodSuccess;
+                if (value === 0) return diceIconTextures.bloodMessyCritical;
+                return null;
+            }
+
+            if (value === 0) return diceIconTextures.normalCriticalSuccess;
+            if (value >= 6 && value <= 9) return diceIconTextures.normalSuccess;
+            return null;
+        }
+
+        // Создание текстуры для пустой грани
+        function createFaceTexture(color = diceFaceColors.normal) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = color;
             ctx.fillRect(0, 0, 256, 256);
-            
-            // Добавляем немного градиента для объёма
+
             const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 180);
             gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
             gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 256, 256);
-            
-            // Рисуем номер
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 140px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // Тень для текста
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 8;
-            ctx.shadowOffsetX = 3;
-            ctx.shadowOffsetY = 3;
-            
-            ctx.fillText(label, 128, 128);
-            
-            // Обводка
-            ctx.shadowColor = 'transparent';
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2;
-            ctx.strokeText(label, 128, 128);
-            
+
             const texture = new THREE.CanvasTexture(canvas);
             texture.needsUpdate = true;
             return texture;
@@ -393,8 +459,9 @@
             return uvMap;
         }
 
-        function createD10() {
+        function createD10(dieType = 'normal') {
             const group = new THREE.Group();
+            group.userData.dieType = dieType;
             
             // Создаем каждую грань как отдельный меш с текстурой
             faceData.forEach((face, faceIndex) => {
@@ -443,8 +510,8 @@
                 geometry.setIndex(indices);
                 geometry.computeVertexNormals();
                 
-                // Материал с текстурой
-                const texture = createFaceTexture(face.label);
+                // Материал пустой грани
+                const texture = createFaceTexture(diceFaceColors[dieType] || diceFaceColors.normal);
                 const material = new THREE.MeshStandardMaterial({
                     map: texture,
                     roughness: 0.3,
@@ -456,6 +523,26 @@
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
                 group.add(mesh);
+
+                const iconTexture = getFaceIconTexture(face.label, dieType);
+                if (iconTexture) {
+                    const iconMaterial = new THREE.MeshStandardMaterial({
+                        map: iconTexture,
+                        transparent: true,
+                        depthWrite: false,
+                        roughness: 0.3,
+                        metalness: 0.2,
+                        side: THREE.DoubleSide,
+                        polygonOffset: true,
+                        polygonOffsetFactor: -1,
+                        polygonOffsetUnits: -1
+                    });
+                    const iconMesh = new THREE.Mesh(geometry.clone(), iconMaterial);
+                    iconMesh.castShadow = false;
+                    iconMesh.receiveShadow = false;
+                    iconMesh.renderOrder = 1;
+                    group.add(iconMesh);
+                }
             });
             
             return group;
@@ -505,18 +592,30 @@
             isRolling = true;
             document.getElementById('rollButton').disabled = true;
             document.getElementById('resultValues').textContent = 'Бросаем...';
+            document.getElementById('bloodResultValues').textContent = 'Бросаем...';
             document.getElementById('resultTotal').textContent = '🎲';
+            document.getElementById('bloodResultTotal').textContent = '🎲';
 
             clearDice();
 
             const count = parseInt(document.getElementById('diceCount').value) || 1;
-            const clampedCount = Math.min(Math.max(count, 1), 10);
+            const bloodCount = parseInt(document.getElementById('bloodDiceCount').value) || 0;
+            const clampedCount = Math.min(Math.max(count, 0), 10);
+            const clampedBloodCount = Math.min(Math.max(bloodCount, 0), 10);
+            const diceToRoll = [
+                ...Array.from({ length: clampedCount }, () => 'normal'),
+                ...Array.from({ length: clampedBloodCount }, () => 'blood')
+            ];
 
-            for (let i = 0; i < clampedCount; i++) {
-                const d10 = createD10();
+            if (diceToRoll.length === 0) {
+                diceToRoll.push('normal');
+            }
+
+            diceToRoll.forEach((dieType, i) => {
+                const d10 = createD10(dieType);
                 const body = createD10PhysicsBody();
 
-                const angle = (i / clampedCount) * Math.PI * 2;
+                const angle = (i / diceToRoll.length) * Math.PI * 2;
                 const radius = 2;
                 const x = Math.cos(angle) * radius + (Math.random() - 0.5) * 2;
                 const z = Math.sin(angle) * radius + (Math.random() - 0.5) * 2;
@@ -544,7 +643,7 @@
                 world.addBody(body);
                 dice.push(d10);
                 diceBodies.push(body);
-            }
+            });
 
             setTimeout(checkDiceStopped, 500);
         }
@@ -572,17 +671,24 @@
         }
 
         function calculateResults() {
-            const results = [];
+            const results = {
+                normal: [],
+                blood: []
+            };
 
             dice.forEach((d10, index) => {
                 const result = getTopFace(diceBodies[index]);
-                results.push(result);
+                const dieType = d10.userData.dieType || 'normal';
+                results[dieType].push(result);
             });
 
-            const total = results.reduce((sum, val) => sum + val, 0);
+            const total = results.normal.reduce((sum, val) => sum + val, 0);
+            const bloodTotal = results.blood.reduce((sum, val) => sum + val, 0);
             
-            document.getElementById('resultValues').textContent = results.join(' + ');
+            document.getElementById('resultValues').textContent = results.normal.length ? results.normal.join(' + ') : '-';
             document.getElementById('resultTotal').textContent = total;
+            document.getElementById('bloodResultValues').textContent = results.blood.length ? results.blood.join(' + ') : '-';
+            document.getElementById('bloodResultTotal').textContent = bloodTotal;
             
             isRolling = false;
             document.getElementById('rollButton').disabled = false;
