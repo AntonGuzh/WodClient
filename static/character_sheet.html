@@ -26,10 +26,14 @@
     <div class="action-buttons">
         <button class="action-btn" onclick="renderCharacterList()">Мои персонажи</button>
         <span></span>
-        <button class="action-btn" onclick="modalManager.open('diceModal')">🎲 Бросить кости</button>
         <button class="action-btn" onclick="modalManager.open('damageModal')">💔 Нанести урон</button>
         <button class="action-btn" onclick="modalManager.open('stressModal')">😰 Получить стресс</button>
         <button class="action-btn" onclick="modalManager.open('humanityValueModal')">🖤 Изменить человечность</button>
+        <span></span>
+        <button class="action-btn" onclick="modalManager.open('baseDiceModal')">🎲 Базовая проверка</button>
+        <button class="action-btn" onclick="modalManager.open('rouseCheckModal')">🩸 Пробуждение крови</button>
+        <button class="action-btn" onclick="modalManager.open('frenzyTestModal')">🔥 Тест безумия</button>
+        <button class="action-btn" onclick="modalManager.open('remorseModal')">🖤 Расскаяться</button>
     </div>
 
     <div id="globalModal" class="modal" x-data="modalManager()">
@@ -84,20 +88,14 @@
                 </div>
             </template>
 
-            <template x-if="currentModal?.id === 'diceModal'">
+            <template x-if="currentModal?.id === 'baseDiceModal'">
                 <div>
-                    <h3>Бросок костей</h3>
+                    <h3>Базовая проверка</h3>
 
                     <!-- Секция ввода -->
                     <div id="diceInputSection">
                         <input type="number" id="diceCount" min="1" value="1" placeholder="Количество кубиков">
-                        <div class="toggle-group">
-                            <label>
-                                <input type="checkbox" id="hungry" checked> 
-                                Учитывать голод
-                            </label>
-                        </div>
-                        <button class="modal-submit" onclick="rollDice()">Бросить</button>
+                        <button class="modal-submit" onclick="rollBaseDice()">Бросить</button>
                     </div>
 
                     <!-- Секция результатов (изначально скрыта) -->
@@ -115,6 +113,66 @@
                         <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
 
                         <!-- Кнопка нового броска -->
+                        <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="currentModal?.id === 'rouseCheckModal'">
+                <div>
+                    <h3>Пробуждение крови</h3>
+
+                    <div id="diceInputSection">
+                        <div style="text-align: center; font-weight: bold; margin: 10px 0;">Кубиков: 1</div>
+                        <button class="modal-submit" onclick="rollRouseCheck()">Бросить</button>
+                    </div>
+
+                    <div id="diceResultSection" style="display: none;">
+                        <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
+                            Успехов: <span id="successCount">0</span>
+                        </div>
+                        <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;"></div>
+                        <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
+                        <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="currentModal?.id === 'frenzyTestModal'">
+                <div>
+                    <h3>Тест безумия</h3>
+
+                    <div id="diceInputSection" x-data="{ count: 0 }" x-init="getFrenzyDiceCount().then(value => count = value)">
+                        <div style="text-align: center; font-weight: bold; margin: 10px 0;">Кубиков: <span x-text="count"></span></div>
+                        <button class="modal-submit" onclick="rollFrenzyTest()">Бросить</button>
+                    </div>
+
+                    <div id="diceResultSection" style="display: none;">
+                        <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
+                            Успехов: <span id="successCount">0</span>
+                        </div>
+                        <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;"></div>
+                        <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
+                        <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="currentModal?.id === 'remorseModal'">
+                <div>
+                    <h3>Расскаяться</h3>
+
+                    <div id="diceInputSection" x-data="{ count: 1 }" x-init="getRemorseDiceCount().then(value => count = value)">
+                        <div style="text-align: center; font-weight: bold; margin: 10px 0;">Кубиков: <span x-text="count"></span></div>
+                        <button class="modal-submit" onclick="rollRemorse()">Бросить</button>
+                    </div>
+
+                    <div id="diceResultSection" style="display: none;">
+                        <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
+                            Успехов: <span id="successCount">0</span>
+                        </div>
+                        <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;"></div>
+                        <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
                         <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
                     </div>
                 </div>
@@ -735,9 +793,18 @@
             });
         }
 
-        function renderSpecialResults(specialTuple) {
+        function renderSpecialResults(specialTuple, message = '', showTypes = true) {
             const specialDiv = document.getElementById('specialResults');
             specialDiv.innerHTML = '';
+
+            const messageHtml = message ? `<div>${message}</div>` : '';
+
+            if (!showTypes) {
+                specialDiv.innerHTML = messageHtml
+                    ? `<div style="padding: 10px; background: #f0f0f0; border-radius: 5px;">${messageHtml}</div>`
+                    : '';
+                return;
+            }
             
             const [failureNum, successNum] = specialTuple;
             
@@ -759,39 +826,95 @@
             
             specialDiv.innerHTML = `
                 <div style="display: flex; flex-direction: column; gap: 5px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                    ${messageHtml}
                     <div><strong>Тип провала:</strong> ${failureDesc}</div>
                     <div><strong>Тип успеха:</strong> ${successDesc}</div>
                 </div>
             `;
         }
 
-        function rollDice() {
+        function showDiceResult(result, message = '', showTypes = true) {
+            // result = [successes, diceDetails, specialTuple]
+            const successes = result[0];
+            const diceDetails = result[1];
+            const specialTuple = result[2];
+
+            document.getElementById('successCount').textContent = successes;
+            renderDiceResults(diceDetails);
+            renderSpecialResults(specialTuple, message, showTypes);
+
+            document.getElementById('diceInputSection').style.display = 'none';
+            document.getElementById('diceResultSection').style.display = 'block';
+        }
+
+        function rollBaseDice() {
             const count = parseInt(document.getElementById('diceCount').value);
-            const useHunger = document.getElementById('hungry').checked; // чекбокс по умолчанию true
             
             if (!count || count < 1) {
                 alert('Введите корректное количество кубиков');
                 return;
             }
             
-            pywebview.api.roll_dice(count, useHunger).then(result => {
-                // result = [successes, diceDetails, specialTuple]
-                const successes = result[0];
-                const diceDetails = result[1];
-                const specialTuple = result[2];
-                
-                document.getElementById('successCount').textContent = successes;
-                renderDiceResults(diceDetails);
-                renderSpecialResults(specialTuple);
-                
-                document.getElementById('diceInputSection').style.display = 'none';
-                document.getElementById('diceResultSection').style.display = 'block';
+            window.rollDice(count, true).then(result => showDiceResult(result));
+        }
+
+        function rollRouseCheck() {
+            window.rollHungerDice(1, 1).then(result => {
+                const message = result[0] >= 1
+                    ? 'Ваш голод не изменился'
+                    : 'Ваш голод увеличивается';
+
+                showDiceResult(result, message, false);
             });
+        }
+
+        async function getCurrentLifeStats() {
+            if (window.lifeStatsData) {
+                return window.lifeStatsData;
+            }
+
+            const data = await window.getLifeStats();
+            window.lifeStatsData = data;
+            return data;
+        }
+
+        async function rollFrenzyTest() {
+            const count = await getFrenzyDiceCount();
+
+            const result = await window.rollDice(count, false);
+            showDiceResult(result);
+        }
+
+        async function getFrenzyDiceCount() {
+            const stats = await getCurrentLifeStats();
+            const availableWillpower = Math.max(0, (stats?.max_willpower ?? 0) - (stats?.hard_willpower_damage ?? 0) - (stats?.light_willpower_damage ?? 0));
+            const humanityBonus = Math.floor((stats?.humanity ?? 0) / 3);
+            return availableWillpower + humanityBonus;
+        }
+
+        async function rollRemorse() {
+            const count = await getRemorseDiceCount();
+
+            const result = await window.rollDice(count, false);
+            const message = result[0] >= 1
+                ? 'Ваши пятна могут быть стерты'
+                : 'Ваша человечность уменьшается';
+
+            showDiceResult(result, message, false);
+        }
+
+        async function getRemorseDiceCount() {
+            const stats = await getCurrentLifeStats();
+            const maxHumanity = stats?.max_humanity ?? 10;
+            const humanity = stats?.humanity ?? 0;
+            const stains = stats?.stains_humanity ?? 0;
+            return Math.max(1, maxHumanity - humanity - stains);
         }
 
         function resetDiceModal() {
             document.getElementById('diceInputSection').style.display = 'block';
             document.getElementById('diceResultSection').style.display = 'none';
+            document.getElementById('successCount').textContent = '0';
             document.getElementById('diceResultsContainer').innerHTML = '';
             document.getElementById('specialResults').innerHTML = '';
         }

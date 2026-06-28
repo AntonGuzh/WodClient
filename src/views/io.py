@@ -127,6 +127,12 @@ class Api:
 
     def roll_dice(self, count, hungry):
         hunger_value = self.character_controller.get_current_character().hunger if hungry else 0
+        return self._roll_dice_with_hunger(count, hunger_value)
+
+    def roll_hunger_dice(self, count, hunger_count):
+        return self._roll_dice_with_hunger(count, hunger_count)
+
+    def _roll_dice_with_hunger(self, count, hunger_value):
         successes, dice_details, special = dices.roll_dices(count, hunger_value)
     
         new_dice_details = []

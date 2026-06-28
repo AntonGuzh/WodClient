@@ -61,6 +61,14 @@ window.setHumanityValue = async (value) => {
     return await callApi('update_humanity', value);
 };
 
+window.rollDice = async (count, hungry) => {
+    return await callApi('roll_dice', count, hungry);
+};
+
+window.rollHungerDice = async (count, hungerCount) => {
+    return await callApi('roll_hunger_dice', count, hungerCount);
+};
+
 window.updateTextField = async (id, value) => {
     return await callApi('update_text_field', id, value);
 };
