@@ -37,6 +37,14 @@ window.applyWillpowerDamage = async (amount, isHeavy, halve) => {
     return await callApi('apply_stress', amount, isHeavy, halve);
 };
 
+window.applyHumanityDamage = async (amount) => {
+    return await callApi('apply_humanity_damage', amount);
+};
+
+window.setHumanityValue = async (value) => {
+    return await callApi('update_humanity', value);
+};
+
 window.updateTextField = async (id, value) => {
     return await callApi('update_text_field', id, value);
 };

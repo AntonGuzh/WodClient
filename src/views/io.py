@@ -92,6 +92,15 @@ class Api:
         self.character_controller.get_current_character().add_willpower_damage(amount, isHeavy, halve)
         self.update_display()
 
+    def apply_humanity_damage(self, amount):
+        self.character_controller.get_current_character().add_humanity_damage(amount)
+        self.update_display()
+
+    def update_humanity(self, value):
+        result = self.character_controller.get_current_character().update_humanity(value)
+        self.update_display()
+        return result
+
     def roll_dice(self, count, hungry):
         hunger_value = self.character_controller.get_current_character().hunger if hungry else 0
         successes, dice_details, special = dices.roll_dices(count, hunger_value)

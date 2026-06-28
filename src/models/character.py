@@ -40,6 +40,8 @@ class VampireCharacter:
     hard_willpower_damage: int = 0  # Тяжелый стресс
     light_willpower_damage: int = 0  # Легкий стресс
     willpower_exhausted: bool = False # Социальное и ментальное истощение
+    stains_humanity: int = 0  # Пятна человечности
+    humanity_exhausted: bool = False # Человечность исчерпана
     
     # Навыки (Skills)
     # Физические навыки
@@ -199,6 +201,10 @@ class VampireCharacter:
     def get_max_willpower(self) -> int:
         """Возвращает максимальное значение воли вампира"""
         return self.resolve + self.composure
+
+    def get_max_humanity(self) -> int:
+        """Возвращает максимальное значение человечности вампира"""
+        return 10
     
     def add_discipline(self, discipline_name: str) -> None:
         """Добавляет дисциплину персонажу"""
@@ -298,6 +304,27 @@ class VampireCharacter:
 
         self.willpower_exhausted = (self.hard_willpower_damage + self.light_willpower_damage) >= self.get_max_willpower()
 
+    def add_humanity_damage(self, damage: int) -> None:
+        damage = int(damage)
+        self.stains_humanity += damage
+        self.stains_humanity = min(self.get_empty_humanity_boxes(), max(0, self.stains_humanity))
+
+        self.humanity_exhausted = self.humanity <= 0
+
+    def get_empty_humanity_boxes(self) -> int:
+        return self.get_max_humanity() - self.humanity
+
+    def update_humanity(self, value: int) -> bool:
+        value = int(value)
+        value = min(self.get_max_humanity(), max(0, value))
+        if self.humanity == value:
+            return False
+
+        self.humanity = value
+        self.stains_humanity = 0
+        self.humanity_exhausted = self.humanity <= 0
+        return True
+
     def get_life_stats(self) -> Dict[str, int]:
         return {
             'max_health': self.get_max_health(),
@@ -308,6 +335,10 @@ class VampireCharacter:
             'hard_willpower_damage': self.hard_willpower_damage,
             'light_willpower_damage': self.light_willpower_damage,
             'willpower_exhausted': self.willpower_exhausted,
+            'max_humanity': self.get_max_humanity(),
+            'humanity': self.humanity,
+            'stains_humanity': self.stains_humanity,
+            'humanity_exhausted': self.humanity_exhausted,
         }
     
     def get_blood_stats(self) -> Dict[str, int]:
