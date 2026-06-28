@@ -11,6 +11,8 @@
     <script defer src="js/components/modal_manager.js"></script>
     <script defer src="js/components/advantages_list.js"></script>
     <script defer src="js/components/disciplines_list.js"></script>
+    <script defer src="js/components/text_input_field.js"></script>
+    <script defer src="js/components/text_area_field.js"></script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -233,25 +235,25 @@
             <div class="header-row">
                 <div class="field">
                     <label>Имя</label>
-                    <input type="text" id="name">
+                    <input type="text" id="name" x-data="textInputField('name')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
                 <div class="field">
                     <label>Концепция</label>
-                    <input type="text" id="concept">
+                    <input type="text" id="concept" x-data="textInputField('concept')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
                 <div class="field">
                     <label>Стиль охоты</label>
-                    <input type="text" id="hunting_style">
+                    <input type="text" id="hunting_style" x-data="textInputField('hunting_style')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
             </div>
             <div class="header-row">
                 <div class="field">
                     <label>Хроника</label>
-                    <input type="text" id="chronicle">
+                    <input type="text" id="chronicle" x-data="textInputField('chronicle')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
                 <div class="field">
                     <label>Цель</label>
-                    <input type="text" id="ambition">
+                    <input type="text" id="ambition" x-data="textInputField('ambition')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
                 <div class="field">
                     <label>Клан</label>
@@ -263,15 +265,15 @@
             <div class="header-row">
                 <div class="field">
                     <label>Сир</label>
-                    <input type="text" id="sire">
+                    <input type="text" id="sire" x-data="textInputField('sire')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
                 <div class="field">
                     <label>Прихоть</label>
-                    <input type="text" id="desire">
+                    <input type="text" id="desire" x-data="textInputField('desire')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
                 <div class="field">
                     <label>Поколение</label>
-                    <input type="text" id="generation">
+                    <input type="text" id="generation" x-data="textInputField('generation')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                 </div>
             </div>
         </div>
@@ -489,7 +491,7 @@
                 <div class="trackers-right">
                     <div class="tracker-small">
                         <h3>Резонанс</h3>
-                        <textarea id="resonance"></textarea>
+                        <textarea id="resonance" x-data="textAreaField('resonance')" x-model="value" @input="resize()" @blur="save()"></textarea>
                     </div>
                     <div class="tracker-small">
                         <h3>Голод</h3>
@@ -536,13 +538,13 @@
                 <!-- Тема хроники -->
                 <div class="text-section">
                     <h3>Тема хроники</h3>
-                    <textarea id="chronicle_theme"></textarea>
+                    <textarea id="chronicle_theme" x-data="textAreaField('chronicle_theme')" x-model="value" @input="resize()" @blur="save()"></textarea>
                 </div>
 
                 <!-- Опоры и принципы -->
                 <div class="text-section">
                     <h3>Опоры и принципы</h3>
-                    <textarea id="touchstones_and_principles"></textarea>
+                    <textarea id="touchstones_and_principles" x-data="textAreaField('touchstones_and_principles')" x-model="value" @input="resize()" @blur="save()"></textarea>
                 </div>
 
                 <!-- Клановый изъян -->
@@ -555,11 +557,11 @@
                 <div class="experience">
                     <div class="exp-field">
                         <label>Всего пунктов опыта</label>
-                        <input type="text" id="total_experience">
+                        <input type="text" id="total_experience" x-data="textInputField('total_experience')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                     </div>
                     <div class="exp-field">
                         <label>Потрачено пунктов опыта</label>
-                        <input type="text" id="spent_experience">
+                        <input type="text" id="spent_experience" x-data="textInputField('spent_experience')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                     </div>
                 </div>
 
@@ -568,21 +570,21 @@
                     <div class="age-row">
                         <div class="age-field">
                             <label>Истинный возраст</label>
-                            <input type="text" id="true_age">
+                            <input type="text" id="true_age" x-data="textInputField('true_age')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                         </div>
                         <div class="age-field">
                             <label>Видимый возраст</label>
-                            <input type="text" id="apparent_age">
+                            <input type="text" id="apparent_age" x-data="textInputField('apparent_age')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                         </div>
                     </div>
                     <div class="age-row">
                         <div class="age-field">
                             <label>Дата рождения</label>
-                            <input type="text" id="date_of_birth">
+                            <input type="text" id="date_of_birth" x-data="textInputField('date_of_birth')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                         </div>
                         <div class="age-field">
                             <label>Дата смерти</label>
-                            <input type="text" id="date_of_death">
+                            <input type="text" id="date_of_death" x-data="textInputField('date_of_death')" x-model="value" @blur="save()" @keypress="blurOnEnter($event)">
                         </div>
                     </div>
                 </div>
@@ -590,25 +592,25 @@
                 <!-- Внешность -->
                 <div class="text-section">
                     <h3>Внешность</h3>
-                    <textarea id="appearance"></textarea>
+                    <textarea id="appearance" x-data="textAreaField('appearance')" x-model="value" @input="resize()" @blur="save()"></textarea>
                 </div>
 
                 <!-- Заметки -->
                 <div class="text-section">
                     <h3>Заметки</h3>
-                    <textarea id="notes"></textarea>
+                    <textarea id="notes" x-data="textAreaField('notes')" x-model="value" @input="resize()" @blur="save()"></textarea>
                 </div>
 
                 <!-- Отличительные черты -->
                 <div class="text-section">
                     <h3>Отличительные черты</h3>
-                    <textarea id="distinctive_features"></textarea>
+                    <textarea id="distinctive_features" x-data="textAreaField('distinctive_features')" x-model="value" @input="resize()" @blur="save()"></textarea>
                 </div>
 
                 <!-- История -->
                 <div class="text-section">
                     <h3>История</h3>
-                    <textarea id="history"></textarea>
+                    <textarea id="history" x-data="textAreaField('history')" x-model="value" @input="resize()" @blur="save()"></textarea>
                 </div>
             </div>
         </div>
@@ -769,10 +771,28 @@
         // Функция для обновления всех вводимых текстовых полей при загрузке
         function updateAllTextFields(fields) {
             for (const [fieldId, value] of Object.entries(fields)) {
+                if (window.textInputFields?.[fieldId]) {
+                    window.textInputFields[fieldId].setValue(value);
+                    continue;
+                }
+
+                if (window.textAreaFields?.[fieldId]) {
+                    window.textAreaFields[fieldId].setValue(value);
+                    continue;
+                }
+
                 const element = document.getElementById(fieldId);
                 if (element) {
                     element.value = value;
+
+                    if (element.tagName === 'INPUT' && element.type === 'text') {
+                        window.textInputFieldValues = window.textInputFieldValues || {};
+                        window.textInputFieldValues[fieldId] = value;
+                    }
+
                     if (element.tagName === 'TEXTAREA') {
+                        window.textAreaFieldValues = window.textAreaFieldValues || {};
+                        window.textAreaFieldValues[fieldId] = value;
                         element.style.height = 'auto';
                         element.style.height = `${element.scrollHeight}px`;
                     }
@@ -788,35 +808,6 @@
                     element.innerHTML = value;
                 }
             }
-        }
-
-        // Функция для автосохранения при изменении поля
-        function setupAutoSave() {
-            // Находим все input и textarea на странице
-            const textInputs = document.querySelectorAll('input[type="text"], textarea');
-            
-            textInputs.forEach(input => {
-                // Сохраняем при потере фокуса (когда пользователь закончил ввод)
-                input.addEventListener('blur', function() {
-                    const fieldId = this.id;
-                    const value = this.value;
-                    
-                    if (fieldId) {
-                        pywebview.api.update_text_field(fieldId, value).then(() => {
-                            console.log(`Автосохранение: ${fieldId}`);
-                        });
-                    }
-                });
-                
-                // Или можно сохранять по нажатию Enter (для input)
-                if (input.tagName === 'INPUT') {
-                    input.addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') {
-                            this.blur();  // триггерим blur
-                        }
-                    });
-                }
-            });
         }
 
         // Обновление обоих трекеров жизни и воли
@@ -919,13 +910,6 @@
             });
         }
 
-        document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.addEventListener('input', function () {
-                this.style.height = 'auto';
-                this.style.height = `${this.scrollHeight}px`;
-            });
-        });
-
         // Загружаем сохранённые значения из Python при старте
         window.addEventListener('pywebviewready', function() {
             console.log('pywebviewready');
@@ -935,9 +919,6 @@
             });
 
             loadClans();
-
-            // Настраиваем автосохранение
-            setupAutoSave();
 
             // Отображаем всё
             pywebview.api.update_display()

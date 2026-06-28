@@ -25,6 +25,10 @@ window.setBasicTrackerValue = async (id, value) => {
     await callApi('update_basic_tracker', id, value);
 };
 
+window.updateTextField = async (id, value) => {
+    return await callApi('update_text_field', id, value);
+};
+
 window.getDisciplineDetails = async (disciplineName) => {
     return await callApi('get_discipline_details', disciplineName);
 };
