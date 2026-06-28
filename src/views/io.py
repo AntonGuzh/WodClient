@@ -46,6 +46,30 @@ class Api:
     def get_basic_trackers(self) -> dict:
         """Возвращает все атрибуты (для начальной загрузки)"""
         return self.character_controller.get_current_character().get_basic_trackers()
+
+    def get_skill_specializations(self, skill_id: str) -> list:
+        """Возвращает специализации навыка"""
+        return self.character_controller.get_current_character().get_skill_specializations(skill_id)
+
+    def add_skill_specialization(self, skill_id: str) -> dict:
+        """Добавляет специализацию навыка"""
+        specialization = self.character_controller.get_current_character().add_skill_specialization(skill_id)
+        return specialization or {}
+
+    def update_skill_specialization(self, skill_id: str, specialization_id: str, name: str) -> bool:
+        """Обновляет специализацию навыка"""
+        return self.character_controller.get_current_character().update_skill_specialization(
+            skill_id,
+            specialization_id,
+            name,
+        )
+
+    def remove_skill_specialization(self, skill_id: str, specialization_id: str) -> bool:
+        """Удаляет специализацию навыка"""
+        return self.character_controller.get_current_character().remove_skill_specialization(
+            skill_id,
+            specialization_id,
+        )
     
     def get_life_stats(self) -> dict:
         return self.character_controller.get_current_character().get_life_stats()

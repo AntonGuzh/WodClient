@@ -25,6 +25,22 @@ window.setBasicTrackerValue = async (id, value) => {
     await callApi('update_basic_tracker', id, value);
 };
 
+window.getSkillSpecializations = async (skillId) => {
+    return await callApi('get_skill_specializations', skillId);
+};
+
+window.addSkillSpecialization = async (skillId) => {
+    return await callApi('add_skill_specialization', skillId);
+};
+
+window.updateSkillSpecialization = async (skillId, specializationId, name) => {
+    return await callApi('update_skill_specialization', skillId, specializationId, name);
+};
+
+window.removeSkillSpecialization = async (skillId, specializationId) => {
+    return await callApi('remove_skill_specialization', skillId, specializationId);
+};
+
 window.getLifeStats = async () => {
     return await callApi('get_life_stats');
 };

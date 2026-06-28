@@ -1,6 +1,8 @@
+import uuid
 from dataclasses import dataclass, field
+from typing import List, Dict, Optional
+
 from dataclasses_json import dataclass_json
-from typing import List, Dict
 
 
 @dataclass_json
@@ -76,6 +78,9 @@ class VampireCharacter:
     investigation: int = 0  # Расследование
     technology: int = 0  # Техника
     finance: int = 0  # Финансы
+
+    # Специализации навыков
+    skill_specializations: Dict[str, List[dict]] = field(default_factory=dict)
     
     # Дисциплины (Disciplines)
     disciplines: Dict[str, List[str]] = field(default_factory=dict)
@@ -179,6 +184,59 @@ class VampireCharacter:
             "technology": self.technology,
             "finance": self.finance
         }
+
+    def get_skill_ids(self) -> List[str]:
+        """Возвращает список идентификаторов навыков"""
+        return list({
+            **self.get_physical_skills(),
+            **self.get_social_skills(),
+            **self.get_mental_skills(),
+        }.keys())
+
+    def get_skill_specializations(self, skill_id: str) -> List[dict]:
+        """Возвращает специализации указанного навыка"""
+        if skill_id not in self.get_skill_ids():
+            return []
+
+        return [dict(specialization) for specialization in self.skill_specializations.get(skill_id, [])]
+
+    def add_skill_specialization(self, skill_id: str) -> Optional[dict]:
+        """Добавляет специализацию навыка и возвращает её данные"""
+        if skill_id not in self.get_skill_ids():
+            return None
+
+        specialization = {'id': str(uuid.uuid4()), 'name': ''}
+        self.skill_specializations.setdefault(skill_id, []).append(specialization)
+        return dict(specialization)
+
+    def update_skill_specialization(self, skill_id: str, specialization_id: str, name: str) -> bool:
+        """Обновляет название специализации навыка"""
+        if skill_id not in self.get_skill_ids():
+            return False
+
+        for specialization in self.skill_specializations.get(skill_id, []):
+            if specialization['id'] == specialization_id:
+                specialization['name'] = str(name)
+                return True
+        return False
+
+    def remove_skill_specialization(self, skill_id: str, specialization_id: str) -> bool:
+        """Удаляет специализацию навыка"""
+        specializations = self.get_skill_specializations(skill_id)
+        new_specializations = [
+            specialization
+            for specialization in specializations
+            if specialization['id'] != specialization_id
+        ]
+
+        if len(new_specializations) == len(specializations):
+            return False
+
+        if new_specializations:
+            self.skill_specializations[skill_id] = new_specializations
+        else:
+            self.skill_specializations.pop(skill_id, None)
+        return True
     
     def get_basic_trackers(self) -> Dict[str, int]:
         """Возвращает словарь всех доступных простых трекеров"""

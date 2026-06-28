@@ -251,6 +251,65 @@ body {
     flex: 1;
 }
 
+.skill-specializations {
+    margin: -2px 0 8px 0;
+    width: clamp(140px, calc(100% - 130px), 260px);
+}
+
+.skill-specializations-list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+}
+
+.skill-specialization {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    align-items: center;
+    gap: 4px;
+}
+
+.skill-specialization input {
+    min-width: 0;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #777;
+    background: transparent;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 1px 2px;
+}
+
+.skill-specialization input:focus {
+    outline: none;
+    border-bottom-color: #8b0000;
+}
+
+.skill-specialization-add,
+.skill-specialization-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    border: 1px solid #8b0000;
+    border-radius: 50%;
+    background: transparent;
+    color: #8b0000;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    padding: 0;
+}
+
+.skill-specialization-add:hover,
+.skill-specialization-remove:hover {
+    background: #8b0000;
+    color: #fff;
+}
+
 .not-clickable {
     cursor: default !important;
     pointer-events: none;
@@ -472,6 +531,11 @@ body {
     .dot, .box {
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
+    }
+
+    .skill-specialization-add,
+    .skill-specialization-remove {
+        display: none;
     }
 }
 

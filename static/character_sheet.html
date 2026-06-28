@@ -8,6 +8,7 @@
 
     <script defer src="js/api.js"></script>
     <script defer src="js/components/mutable_tracker.js"></script>
+    <script defer src="js/components/skill_specializations.js"></script>
     <script defer src="js/components/life_tracker.js"></script>
     <script defer src="js/components/humanity_tracker.js"></script>
     <script defer src="js/components/modal_manager.js"></script>
@@ -373,115 +374,141 @@
                                 <span>Атлетика</span>
                                 <div x-data="mutableTracker('athletics', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('athletics')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Вождение</span>
                                 <div x-data="mutableTracker('drive', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('drive')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Воровство</span>
                                 <div x-data="mutableTracker('larceny', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('larceny')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Выживание</span>
                                 <div x-data="mutableTracker('survival', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('survival')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Драка</span>
                                 <div x-data="mutableTracker('brawl', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('brawl')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Ремесло</span>
                                 <div x-data="mutableTracker('craft', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('craft')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Скрытность</span>
                                 <div x-data="mutableTracker('stealth', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('stealth')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Стрельба</span>
                                 <div x-data="mutableTracker('firearms', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('firearms')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Фехтование</span>
                                 <div x-data="mutableTracker('melee', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('melee')" x-html="render()"></div>
                         </div>
                         <div class="skills-column">
                             <div class="skill">
                                 <span>Запугивание</span>
                                 <div x-data="mutableTracker('intimidation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('intimidation')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Исполнение</span>
                                 <div x-data="mutableTracker('performance', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('performance')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Лидерство</span>
                                 <div x-data="mutableTracker('leadership', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('leadership')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Обращение с животными</span>
                                 <div x-data="mutableTracker('animal_ken', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('animal_ken')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Проницательность</span>
                                 <div x-data="mutableTracker('insight', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('insight')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Убеждение</span>
                                 <div x-data="mutableTracker('persuasion', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('persuasion')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Уличное чутьё</span>
                                 <div x-data="mutableTracker('streetwise', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('streetwise')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Хитрость</span>
                                 <div x-data="mutableTracker('subterfuge', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('subterfuge')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Этикет</span>
                                 <div x-data="mutableTracker('etiquette', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('etiquette')" x-html="render()"></div>
                         </div>
                         <div class="skills-column">
                             <div class="skill">
                                 <span>Гуманитарные науки</span>
                                 <div x-data="mutableTracker('humanities', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('humanities')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Естественные науки</span>
                                 <div x-data="mutableTracker('science', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('science')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Медицина</span>
                                 <div x-data="mutableTracker('medicine', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('medicine')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Наблюдательность</span>
                                 <div x-data="mutableTracker('awareness', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('awareness')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Оккультизм</span>
-                                <div class="" id="occult" data-total="5" data-value="0" data-type="dot"></div>
                                 <div x-data="mutableTracker('occult', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('occult')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Политика</span>
                                 <div x-data="mutableTracker('politics', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('politics')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Расследование</span>
                                 <div x-data="mutableTracker('investigation', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('investigation')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Техника</span>
                                 <div x-data="mutableTracker('technology', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('technology')" x-html="render()"></div>
                             <div class="skill">
                                 <span>Финансы</span>
                                 <div x-data="mutableTracker('finance', 5, 'dots', 'dot', getBasicTrackerValue, setBasicTrackerValue)" x-html="render()"></div>
                             </div>
+                            <div class="skill-specializations" x-data="skillSpecializations('finance')" x-html="render()"></div>
                         </div>
                     </div>
                 </div>
