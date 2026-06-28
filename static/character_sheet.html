@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Бланк персонажа - Вампиры: Маскарад</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dice_roller_3d.css">
 
     <script defer src="js/api.js"></script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <script defer src="js/dice_roller_3d.js"></script>
+    <script defer src="js/dice_roll_modal.js"></script>
     <script defer src="js/components/mutable_tracker.js"></script>
     <script defer src="js/components/skill_specializations.js"></script>
     <script defer src="js/components/life_tracker.js"></script>
@@ -30,14 +35,14 @@
         <button class="action-btn" onclick="modalManager.open('stressModal')">😰 Получить стресс</button>
         <button class="action-btn" onclick="modalManager.open('humanityValueModal')">🖤 Изменить человечность</button>
         <span></span>
-        <button class="action-btn" onclick="modalManager.open('baseDiceModal')">🎲 Базовая проверка</button>
-        <button class="action-btn" onclick="modalManager.open('rouseCheckModal')">🩸 Пробуждение крови</button>
-        <button class="action-btn" onclick="modalManager.open('frenzyTestModal')">🔥 Тест безумия</button>
-        <button class="action-btn" onclick="modalManager.open('remorseModal')">🖤 Расскаяться</button>
+        <button class="action-btn" onclick="modalManager.open('baseDiceModal', { dice: true })">🎲 Базовая проверка</button>
+        <button class="action-btn" onclick="modalManager.open('rouseCheckModal', { dice: true })">🩸 Пробуждение крови</button>
+        <button class="action-btn" onclick="modalManager.open('frenzyTestModal', { dice: true })">🔥 Тест безумия</button>
+        <button class="action-btn" onclick="modalManager.open('remorseModal', { dice: true })">🖤 Расскаяться</button>
     </div>
 
     <div id="globalModal" class="modal" x-data="modalManager()">
-        <div class="modal-content" :class="currentModal?.params.wide ? 'modal-wide' : ''">
+        <div class="modal-content" :class="{ 'modal-wide': currentModal?.params.wide, 'modal-dice': currentModal?.params.dice }">
             <div class="modal-header" :class="stack.length > 1 ? 'with-nav' : ''">
                 <span class="nav-btn back-btn" x-show="stack.length > 1" @click="back()">←</span>
                 <span class="close-btn" @click="close()">&times;</span>
@@ -103,11 +108,7 @@
                         <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
                             Успехов: <span id="successCount">0</span>
                         </div>
-
-                        <!-- Контейнер для кубиков (картинки) -->
-                        <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;">
-                            <!-- сюда будут добавляться img -->
-                        </div>
+                        <div id="diceRoller3D" class="dice-roller-3d"></div>
 
                         <!-- Особые результаты -->
                         <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
@@ -133,7 +134,7 @@
                         <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
                             Успехов: <span id="successCount">0</span>
                         </div>
-                        <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;"></div>
+                        <div id="diceRoller3D" class="dice-roller-3d"></div>
                         <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
                         <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
                     </div>
@@ -153,7 +154,7 @@
                         <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
                             Успехов: <span id="successCount">0</span>
                         </div>
-                        <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;"></div>
+                        <div id="diceRoller3D" class="dice-roller-3d"></div>
                         <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
                         <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
                     </div>
@@ -173,7 +174,7 @@
                         <div style="font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">
                             Успехов: <span id="successCount">0</span>
                         </div>
-                        <div id="diceResultsContainer" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 15px 0;"></div>
+                        <div id="diceRoller3D" class="dice-roller-3d"></div>
                         <div id="specialResults" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
                         <button class="modal-submit" onclick="resetDiceModal()">Новый бросок</button>
                     </div>
@@ -756,266 +757,6 @@
             });
         }
         
-        // Соответствие типов результатов картинкам
-        const diceImages = {
-            0: 'img/dices/FAILURE.png',
-            1: 'img/dices/BESTIAL_FAILURE.png',
-            2: 'img/dices/BLOOD_FAILURE.png',
-            3: 'img/dices/SUCCESS.png',
-            4: 'img/dices/BLOOD_SUCCESS.png',
-            5: 'img/dices/CRITICAL_SUCCESS.png',
-            6: 'img/dices/MESSY_CRITICAL.png'
-        };
-        const normalDiceResults = new Set([0, 3, 5]);
-        let currentBaseDiceRoll = null;
-
-        // Функция для форматирования типа результата в читаемый текст (для подсказок)
-        function getResultDescription(result) {
-            const descriptions = {
-                0: 'Неудача',
-                1: 'Звериная неудача',
-                2: 'Провал (Голод)',
-                3: 'Успех',
-                4: 'Успех (Голод)',
-                5: 'Критический успех',
-                6: 'Кровавый критический успех'
-            };
-            return descriptions[result] || result;
-        }
-
-        function renderDiceResults(diceDetails, allowSelection = false) {
-            const container = document.getElementById('diceResultsContainer');
-            container.innerHTML = '';
-            
-            diceDetails.forEach((detail, index) => {
-                const img = document.createElement('img');
-                img.className = 'dice-image';
-                img.src = diceImages[detail.result] || diceImages['failure'];
-                img.alt = detail.result;
-                img.title = getResultDescription(detail.result);
-
-                if (allowSelection) {
-                    img.classList.add('selectable');
-                    img.dataset.index = index;
-
-                    if (currentBaseDiceRoll?.selectedIndexes.has(index)) {
-                        img.classList.add('selected');
-                    }
-
-                    img.addEventListener('click', () => toggleDiceSelection(index, img));
-                }
-
-                container.appendChild(img);
-            });
-
-            updateWillpowerRerollButton();
-        }
-
-        function renderSpecialResults(specialTuple, message = '', showTypes = true) {
-            const specialDiv = document.getElementById('specialResults');
-            specialDiv.innerHTML = '';
-
-            const messageHtml = message ? `<div>${message}</div>` : '';
-
-            if (!showTypes) {
-                specialDiv.innerHTML = messageHtml
-                    ? `<div style="padding: 10px; background: #f0f0f0; border-radius: 5px;">${messageHtml}</div>`
-                    : '';
-                return;
-            }
-            
-            const [failureNum, successNum] = specialTuple;
-            
-            // Описания для каждого числа
-            const failureDescriptions = {
-                0: 'Провал',
-                1: 'Звериный провал',
-            };
-            
-            const successDescriptions = {
-                3: 'Успех',
-                5: 'Триумф',
-                6: 'Кровавый триумф'
-            };
-            
-            // Берём описание или "Неизвестно"
-            const failureDesc = failureDescriptions[failureNum] || 'Провал';
-            const successDesc = successDescriptions[successNum] || 'Успех';
-            
-            specialDiv.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 5px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-                    ${messageHtml}
-                    <div><strong>Тип провала:</strong> ${failureDesc}</div>
-                    <div><strong>Тип успеха:</strong> ${successDesc}</div>
-                </div>
-            `;
-        }
-
-        function showDiceResult(result, message = '', showTypes = true, allowReroll = false) {
-            // result = [successes, diceDetails, specialTuple]
-            const successes = result[0];
-            const diceDetails = result[1];
-            const specialTuple = result[2];
-
-            document.getElementById('successCount').textContent = successes;
-            renderDiceResults(diceDetails, allowReroll);
-            renderSpecialResults(specialTuple, message, showTypes);
-
-            document.getElementById('diceInputSection').style.display = 'none';
-            document.getElementById('diceResultSection').style.display = 'block';
-        }
-
-        function isNormalDice(index) {
-            const result = currentBaseDiceRoll?.diceDetails[index]?.result;
-            return normalDiceResults.has(result);
-        }
-
-        function shakeDice(img) {
-            img.classList.remove('shake');
-            void img.offsetWidth;
-            img.classList.add('shake');
-        }
-
-        function toggleDiceSelection(index, img) {
-            if (!currentBaseDiceRoll?.canReroll || !isNormalDice(index)) {
-                shakeDice(img);
-                return;
-            }
-
-            if (currentBaseDiceRoll.selectedIndexes.has(index)) {
-                currentBaseDiceRoll.selectedIndexes.delete(index);
-                img.classList.remove('selected');
-                updateWillpowerRerollButton();
-                return;
-            }
-
-            if (currentBaseDiceRoll.selectedIndexes.size >= 3) {
-                shakeDice(img);
-                return;
-            }
-
-            currentBaseDiceRoll.selectedIndexes.add(index);
-            img.classList.add('selected');
-            updateWillpowerRerollButton();
-        }
-
-        function updateWillpowerRerollButton() {
-            const button = document.getElementById('willpowerRerollButton');
-            if (!button) {
-                return;
-            }
-
-            button.disabled = !currentBaseDiceRoll?.canReroll || currentBaseDiceRoll.selectedIndexes.size === 0;
-        }
-
-        async function rollBaseDice() {
-            const count = parseInt(document.getElementById('diceCount').value);
-            
-            if (!count || count < 1) {
-                alert('Введите корректное количество кубиков');
-                return;
-            }
-
-            const hunger = parseInt(await window.getBasicTrackerValue('hunger')) || 0;
-            const result = await window.rollDice(count, true);
-            currentBaseDiceRoll = {
-                count,
-                hungerCount: Math.min(count, hunger),
-                diceDetails: result[1],
-                selectedIndexes: new Set(),
-                canReroll: true,
-            };
-            showDiceResult(result, '', true, true);
-        }
-
-        async function rerollSelectedDice() {
-            if (!currentBaseDiceRoll?.canReroll || currentBaseDiceRoll.selectedIndexes.size === 0) {
-                return;
-            }
-
-            const selectedIndexes = Array.from(currentBaseDiceRoll.selectedIndexes);
-            const previousResults = currentBaseDiceRoll.diceDetails.map(detail => detail.result);
-            currentBaseDiceRoll.canReroll = false;
-            updateWillpowerRerollButton();
-
-            const result = await window.rerollDice(
-                currentBaseDiceRoll.count,
-                currentBaseDiceRoll.hungerCount,
-                previousResults,
-                selectedIndexes,
-            );
-
-            currentBaseDiceRoll.diceDetails = result[1];
-            currentBaseDiceRoll.selectedIndexes = new Set();
-            showDiceResult(result, '', true, false);
-        }
-
-        function rollRouseCheck() {
-            currentBaseDiceRoll = null;
-            window.rollHungerDice(1, 1).then(result => {
-                const message = result[0] >= 1
-                    ? 'Ваш голод не изменился'
-                    : 'Ваш голод увеличивается';
-
-                showDiceResult(result, message, false);
-            });
-        }
-
-        async function getCurrentLifeStats() {
-            if (window.lifeStatsData) {
-                return window.lifeStatsData;
-            }
-
-            const data = await window.getLifeStats();
-            window.lifeStatsData = data;
-            return data;
-        }
-
-        async function rollFrenzyTest() {
-            currentBaseDiceRoll = null;
-            const count = await getFrenzyDiceCount();
-
-            const result = await window.rollDice(count, false);
-            showDiceResult(result);
-        }
-
-        async function getFrenzyDiceCount() {
-            const stats = await getCurrentLifeStats();
-            const availableWillpower = Math.max(0, (stats?.max_willpower ?? 0) - (stats?.hard_willpower_damage ?? 0) - (stats?.light_willpower_damage ?? 0));
-            const humanityBonus = Math.floor((stats?.humanity ?? 0) / 3);
-            return availableWillpower + humanityBonus;
-        }
-
-        async function rollRemorse() {
-            currentBaseDiceRoll = null;
-            const count = await getRemorseDiceCount();
-
-            const result = await window.rollDice(count, false);
-            const message = result[0] >= 1
-                ? 'Ваши пятна могут быть стерты'
-                : 'Ваша человечность уменьшается';
-
-            showDiceResult(result, message, false);
-        }
-
-        async function getRemorseDiceCount() {
-            const stats = await getCurrentLifeStats();
-            const maxHumanity = stats?.max_humanity ?? 10;
-            const humanity = stats?.humanity ?? 0;
-            const stains = stats?.stains_humanity ?? 0;
-            return Math.max(1, maxHumanity - humanity - stains);
-        }
-
-        function resetDiceModal() {
-            document.getElementById('diceInputSection').style.display = 'block';
-            document.getElementById('diceResultSection').style.display = 'none';
-            document.getElementById('successCount').textContent = '0';
-            document.getElementById('diceResultsContainer').innerHTML = '';
-            document.getElementById('specialResults').innerHTML = '';
-            currentBaseDiceRoll = null;
-            updateWillpowerRerollButton();
-        }
-
         // Функция для обновления всех вводимых текстовых полей при загрузке
         function updateAllTextFields(fields) {
             for (const [fieldId, value] of Object.entries(fields)) {

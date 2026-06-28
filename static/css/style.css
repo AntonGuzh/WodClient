@@ -772,29 +772,6 @@ body {
     }
 }
 
-/* Стили для изображений кубиков */
-.dice-image {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-}
-
-.dice-image.selectable {
-    cursor: pointer;
-    border-radius: 8px;
-    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
-}
-
-.dice-image.selected {
-    transform: translateY(-4px) scale(1.03);
-    filter: brightness(1.12);
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.45), 0 4px 12px rgba(0,0,0,0.25);
-}
-
-.dice-image.shake {
-    animation: dice-shake 0.25s ease-in-out;
-}
-
 .modal-submit:disabled {
     background-color: #777;
     cursor: not-allowed;
@@ -803,13 +780,6 @@ body {
 
 .modal-submit:disabled:hover {
     background-color: #777;
-}
-
-@keyframes dice-shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    50% { transform: translateX(4px); }
-    75% { transform: translateX(-3px); }
 }
 
 /* Дисциплины */
@@ -932,6 +902,12 @@ body {
 .modal-wide {
     width: 600px;
     max-width: 90%;
+}
+
+.modal-dice {
+    width: 750px;
+    max-width: 95vw;
+    margin: 5vh auto;
 }
 
 .disciplines-list, .powers-list {

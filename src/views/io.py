@@ -125,28 +125,21 @@ class Api:
         self.update_display()
         return result
 
-    def roll_dice(self, count, hungry):
-        hunger_value = self.character_controller.get_current_character().hunger if hungry else 0
-        return self._roll_dice_with_hunger(count, hunger_value)
-
-    def roll_hunger_dice(self, count, hunger_count):
-        return self._roll_dice_with_hunger(count, hunger_count)
-
-    def reroll_dice(self, count, hunger_count, previous_results, rerolling_indexes):
-        previous_results = [dices.Result(result) for result in previous_results]
-        successes, dice_details, special = dices.reroll_dices(count, hunger_count, previous_results, rerolling_indexes)
-        return self._format_dice_result(successes, dice_details, special)
-
-    def _roll_dice_with_hunger(self, count, hunger_value):
-        successes, dice_details, special = dices.roll_dices(count, hunger_value)
+    def evaluate_dice_values(self, dice_values, hunger_count):
+        dice_values = [int(value) for value in dice_values]
+        successes, dice_details, special = dices.evaluate_dices(dice_values, int(hunger_count))
+        return self._format_dice_result(successes, dice_details, special, dice_values, int(hunger_count))
 
         return self._format_dice_result(successes, dice_details, special)
 
-    def _format_dice_result(self, successes, dice_details, special):
+    def _format_dice_result(self, successes, dice_details, special, dice_values=None, hunger_count=0):
         new_dice_details = []
-        for d in dice_details:
+        for idx, d in enumerate(dice_details):
             new_d = dict()
             new_d['result'] = d.value
+            if dice_values is not None:
+                new_d['raw_value'] = dice_values[idx]
+                new_d['is_hunger'] = idx < hunger_count
             new_dice_details.append(new_d)
         special_str = (special[0].value, special[1].value)
 

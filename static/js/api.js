@@ -63,16 +63,8 @@ window.setHumanityValue = async (value) => {
     return await callApi('update_humanity', value);
 };
 
-window.rollDice = async (count, hungry) => {
-    return await callApi('roll_dice', count, hungry);
-};
-
-window.rollHungerDice = async (count, hungerCount) => {
-    return await callApi('roll_hunger_dice', count, hungerCount);
-};
-
-window.rerollDice = async (count, hungerCount, previousResults, rerollingIndexes) => {
-    return await callApi('reroll_dice', count, hungerCount, previousResults, rerollingIndexes);
+window.evaluateDiceValues = async (diceValues, hungerCount) => {
+    return await callApi('evaluate_dice_values', diceValues, hungerCount);
 };
 
 window.updateTextField = async (id, value) => {
