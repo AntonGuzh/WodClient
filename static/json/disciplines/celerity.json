@@ -1,7 +1,7 @@
 {
     "discipline": {
         "name": "Стремительность",
-        "icon": "img/diciplines/Celerity_transparent.png",
+        "icon": "img/disciplines/Celerity_transparent.png",
         "source": "Corebook",
         "short_description": "Дисциплина сверхъестественной скорости.",
         "general_rule": "",

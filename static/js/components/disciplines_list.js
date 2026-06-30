@@ -109,7 +109,7 @@ document.addEventListener('alpine:init', () => {
                     <template x-for="discData in disciplinesList" :key="discData.name">
                         <div class="discipline-card">
                             <div class="discipline-header">
-                                <div class="discipline-info" @click="window.modalManager.open('disciplineDetailsModal', {wide: true, diciplineName: discData.name})">
+                                <div class="discipline-info" @click="window.modalManager.open('disciplineDetailsModal', {wide: true, disciplineName: discData.name})">
                                     <img :src="discData.info.icon" class="discipline-icon">
                                     <span class="discipline-title" x-text="discData.name"></span>
                                     <div class="discipline-level">

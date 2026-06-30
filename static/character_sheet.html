@@ -184,7 +184,7 @@
             </template>
 
             <template x-if="currentModal?.id === 'disciplineDetailsModal'">
-                <div x-data="{ data: null }" x-init="data = await getDisciplineDetails(currentModal?.params.diciplineName)" class="modal-body">
+                <div x-data="{ data: null }" x-init="data = await getDisciplineDetails(currentModal?.params.disciplineName)" class="modal-body">
                     <div class="details-content">
                         <img :src="data?.icon">
                         <h2 x-text="data?.name"></h2>
@@ -199,7 +199,7 @@
             </template>
 
             <template x-if="currentModal?.id === 'disciplineDetailsForAddModal'">
-                <div x-data="{ data: null }" x-init="data = await getDisciplineDetails(currentModal?.params.diciplineName)" class="modal-body">
+                <div x-data="{ data: null }" x-init="data = await getDisciplineDetails(currentModal?.params.disciplineName)" class="modal-body">
                     <div class="details-content">
                         <img :src="data?.icon">
                         <h2 x-text="data?.name"></h2>
@@ -289,7 +289,7 @@
                     <h3>Выберите дисциплину</h3>
                     <div id="disciplinesList" class="disciplines-list modal-body">
                         <template x-for="disc in disciplines || []" :key="disc.name">
-                            <div class="discipline-list-item" :class="disc.is_clan ? 'clan-discipline' : ''" @click="open('disciplineDetailsForAddModal', {wide: true, diciplineName: disc.name})">
+                            <div class="discipline-list-item" :class="disc.is_clan ? 'clan-discipline' : ''" @click="open('disciplineDetailsForAddModal', {wide: true, disciplineName: disc.name})">
                                 <img :src="disc.icon" class="icon">
                                 <strong x-text="disc.name"></strong>
                                 <span class="short-desc" x-text="disc.short_description"></span>

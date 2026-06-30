@@ -1,7 +1,7 @@
 {
     "discipline": {
         "name": "Мощь",
-        "icon": "img/diciplines/Potence_transparent.png",
+        "icon": "img/disciplines/Potence_transparent.png",
         "source": "Corebook",
         "short_description": "Дисциплина сверхъестественной силы.",
         "general_rule": "",

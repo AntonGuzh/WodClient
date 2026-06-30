@@ -137,7 +137,7 @@ Alpine-компонент -> static/js/api.js -> pywebview.api -> src/views/io.p
 1. Добавить или обновить JSON-файл в `static/json/disciplines/`.
 2. Убедиться, что данные дисциплины совпадают с `src/models/discipline.py`.
 3. Убедиться, что данные способностей совпадают с `src/models/discipline_power.py`.
-4. Добавить изображение дисциплины в `static/img/diciplines/`, если оно используется.
+4. Добавить изображение дисциплины в `static/img/disciplines/`, если оно используется.
 
 ## Правила разработки frontend
 

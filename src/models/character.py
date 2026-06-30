@@ -334,10 +334,10 @@ class VampireCharacter:
 
         if is_hard_damage:
             self.hard_health_damage += damage
-            self.light_health_damage += min(0, remaining_health - damage) # Остаток тяжелых повреждений перекрывает легкие
+            self.light_health_damage += min(0, remaining_health - damage) # Остаток тяжёлых повреждений перекрывает лёгкие
         else:
             self.light_health_damage += min(damage, remaining_health)
-            self.add_health_damage(max(0, damage - remaining_health), True, False) # Остаток становится тяжелыми повреждениями
+            self.add_health_damage(max(0, damage - remaining_health), True, False) # Остаток становится тяжёлыми повреждениями
 
         self.hard_health_damage = min(self.get_max_health(), self.hard_health_damage)
         self.light_health_damage = max(0, self.light_health_damage)
@@ -352,10 +352,10 @@ class VampireCharacter:
 
         if is_hard_damage:
             self.hard_willpower_damage += damage
-            self.light_willpower_damage += min(0, remaining_willpower - damage) # Остаток тяжелых повреждений перекрывает легкие
+            self.light_willpower_damage += min(0, remaining_willpower - damage) # Остаток тяжёлых повреждений перекрывает лёгкие
         else:
             self.light_willpower_damage += min(damage, remaining_willpower)
-            self.add_willpower_damage(max(0, damage - remaining_willpower), True, False) # Остаток становится тяжелыми повреждениями
+            self.add_willpower_damage(max(0, damage - remaining_willpower), True, False) # Остаток становится тяжёлыми повреждениями
 
         self.hard_willpower_damage = min(self.get_max_willpower(), self.hard_willpower_damage)
         self.light_willpower_damage = max(0, self.light_willpower_damage)
