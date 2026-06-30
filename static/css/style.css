@@ -11,6 +11,7 @@ body {
 }
 
 .character-sheet {
+    position: relative;
     max-width: 1200px;
     margin: 0 auto;
     background-color: #faf4e9;
@@ -87,6 +88,39 @@ body {
     padding-bottom: 5px;
     margin-bottom: 15px;
     letter-spacing: 2px;
+}
+
+.condition-floating-list {
+    position: absolute;
+    top: 0;
+    left: -190px;
+    z-index: 20;
+    width: 170px;
+    display: grid;
+    gap: 10px;
+}
+
+.condition-floating-card {
+    min-height: 76px;
+    padding: 10px 12px;
+    border: 2px solid #ff2a12;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    color: #333;
+    font-size: 12px;
+}
+
+.condition-floating-card strong {
+    display: block;
+    color: #8b0000;
+    font-size: 14px;
+    line-height: 1.15;
+    margin-bottom: 6px;
+}
+
+.condition-floating-card span {
+    line-height: 1.25;
 }
 
 /* Характеристики - контейнер для 3 колонок */
@@ -544,6 +578,13 @@ body {
     .main-section {
         flex-direction: column;
     }
+
+    .condition-floating-list {
+        position: static;
+        width: 100%;
+        margin-bottom: 16px;
+        grid-template-columns: 1fr;
+    }
     
     .skills-columns {
         flex-direction: column;
@@ -708,6 +749,29 @@ body {
 
 .modal-submit:hover {
     background-color: #a52a2a;
+}
+
+.dice-conditions-reminder {
+    margin: 10px 0 14px;
+    padding: 10px 12px;
+    border-left: 3px solid #8b0000;
+    background: #fff8f0;
+    color: #333;
+    font-size: 13px;
+}
+
+.dice-conditions-title {
+    color: #8b0000;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.dice-conditions-reminder ul {
+    padding-left: 18px;
+}
+
+.dice-conditions-reminder li + li {
+    margin-top: 4px;
 }
 
 .modal h3 {

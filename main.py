@@ -31,7 +31,7 @@ if __name__ == "__main__":
         "Мир тьмы. Лист персонажа",
         url=index_path,
         js_api=api,
-        width=1600,
+        width=1630,
         height=1400
     )
     api.set_window(window)

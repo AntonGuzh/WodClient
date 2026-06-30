@@ -16,6 +16,7 @@
     <script defer src="js/components/skill_specializations.js"></script>
     <script defer src="js/components/life_tracker.js"></script>
     <script defer src="js/components/humanity_tracker.js"></script>
+    <script defer src="js/components/condition_reminders.js"></script>
     <script defer src="js/components/modal_manager.js"></script>
     <script defer src="js/components/advantages_list.js"></script>
     <script defer src="js/components/disciplines_list.js"></script>
@@ -100,6 +101,7 @@
                     <!-- Секция ввода -->
                     <div id="diceInputSection">
                         <input type="number" id="diceCount" min="1" value="1" placeholder="Количество кубиков">
+                        <div x-data="conditionReminders('dice')" x-html="render()"></div>
                         <button class="modal-submit" onclick="rollBaseDice()">Бросить</button>
                     </div>
 
@@ -319,6 +321,8 @@
 
     <!-- Остальной HTML остаётся без изменений -->
     <div class="character-sheet" x-data="clanManager()">
+        <div x-data="conditionReminders('overlay')" x-html="render()"></div>
+
         <!-- Шапка -->
         <div class="header">
             <div class="header-row">
@@ -819,6 +823,10 @@
 
             if (window.humanityTracker) {
                 window.humanityTracker.setStats(data);
+            }
+
+            if (window.conditionReminderComponents) {
+                window.conditionReminderComponents.forEach(component => component.setStats(data));
             }
         }
 

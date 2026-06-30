@@ -367,10 +367,14 @@ class VampireCharacter:
         self.stains_humanity += damage
         self.stains_humanity = min(self.get_empty_humanity_boxes(), max(0, self.stains_humanity))
 
-        self.humanity_exhausted = self.humanity <= 0
+        self.humanity_exhausted = self.is_humanity_exhausted()
 
     def get_empty_humanity_boxes(self) -> int:
         return self.get_max_humanity() - self.humanity
+
+    def is_humanity_exhausted(self) -> bool:
+        empty_boxes = self.get_empty_humanity_boxes()
+        return empty_boxes > 0 and self.stains_humanity >= empty_boxes
 
     def update_humanity(self, value: int) -> bool:
         value = int(value)
@@ -380,10 +384,11 @@ class VampireCharacter:
 
         self.humanity = value
         self.stains_humanity = 0
-        self.humanity_exhausted = self.humanity <= 0
+        self.humanity_exhausted = self.is_humanity_exhausted()
         return True
 
     def get_life_stats(self) -> Dict[str, int]:
+        self.humanity_exhausted = self.is_humanity_exhausted()
         return {
             'max_health': self.get_max_health(),
             'hard_health_damage': self.hard_health_damage,
