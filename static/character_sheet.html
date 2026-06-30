@@ -38,7 +38,7 @@
         <button class="action-btn" onclick="modalManager.open('baseDiceModal', { dice: true })">🎲 Базовая проверка</button>
         <button class="action-btn" onclick="modalManager.open('rouseCheckModal', { dice: true })">🩸 Пробуждение крови</button>
         <button class="action-btn" onclick="modalManager.open('frenzyTestModal', { dice: true })">🔥 Тест безумия</button>
-        <button class="action-btn" onclick="modalManager.open('remorseModal', { dice: true })">🖤 Расскаяться</button>
+        <button class="action-btn" onclick="modalManager.open('remorseModal', { dice: true })">🖤 Раскаяться</button>
     </div>
 
     <div id="globalModal" class="modal" x-data="modalManager()">
@@ -163,7 +163,7 @@
 
             <template x-if="currentModal?.id === 'remorseModal'">
                 <div>
-                    <h3>Расскаяться</h3>
+                    <h3>Раскаяться</h3>
 
                     <div id="diceInputSection" x-data="{ count: 1 }" x-init="getRemorseDiceCount().then(value => count = value)">
                         <div style="text-align: center; font-weight: bold; margin: 10px 0;">Кубиков: <span x-text="count"></span></div>
